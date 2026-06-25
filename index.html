@@ -1,356 +1,557 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ตู้กดน้ำอัตโนมัติ</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @keyframes scan {
-            0% { top: 0%; opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
-        }
-        .animate-scan { animation: scan 2s ease-in-out infinite; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ตู้กดน้ำอัตโนมัติ (Water Vending Machine)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts (Sarabun) -->
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Sarabun', sans-serif;
+    }
+    @keyframes scan {
+      0% { top: 0%; opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { top: 100%; opacity: 0; }
+    }
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes bounce-once {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .animate-scan-line {
+      animation: scan 2s ease-in-out infinite;
+    }
+    .animate-fade-in {
+      animation: fade-in 0.3s ease-out forwards;
+    }
+    .animate-bounce-once {
+      animation: bounce-once 1s ease-in-out;
+    }
+  </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex justify-center font-sans">
+<body class="bg-gray-100 min-h-screen flex justify-center items-center">
 
-    <div class="w-full max-w-md bg-white min-h-screen shadow-2xl relative overflow-hidden flex flex-col">
+  <!-- Mobile Device Container Simulation -->
+  <div class="w-full max-w-md bg-white min-h-screen shadow-2xl relative overflow-hidden flex flex-col" id="app-container">
+    <!-- Dynamic content will render here -->
+  </div>
+
+  <script>
+    // Inline SVG Icons definition to keep it zero-dependency
+    const Icons = {
+      droplet: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>`,
+      user: `<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>`,
+      userSmall: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>`,
+      checkCircle: `<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
+      qrCode: `<svg class="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h.01M5.905 6.416A3.001 3.001 0 113 9h3.095M9 21h11a2 2 0 002-2V9a2 2 0 00-2-2H9a2 2 0 00-2 2v10a2 2 0 002 2zm3-10V9M9 9H5a2 2 0 00-2 2v8a2 2 0 002 2h4a2 2 0 002-2v-8a2 2 0 00-2-2zm3 4v3"></path></svg>`,
+      barChart: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>`,
+      arrowLeft: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>`,
+      activity: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>`,
+      history: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
+      trash: `<svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`
+    };
+
+    // --- STREAMING_CHUNK: State Management ---
+    // Initialize state from LocalStorage (identical keys to React version)
+    const state = {
+      currentView: 'home',
+      currentUser: JSON.parse(localStorage.getItem('vending_current_user')) || null,
+      adminData: JSON.parse(localStorage.getItem('vending_admin_data')) || {
+        totalSales: 0,
+        members: [],
+        transactions: []
+      },
+      selectedWater: null,
+      selectedBank: null,
+      orderSummary: null
+    };
+
+    const WATER_TIERS = [
+      { id: 1, name: 'น้ำดื่มชั้นที่ 1 (ดีโด้)', price: 10, color: 'bg-blue-400' },
+      { id: 2, name: 'น้ำดื่มชั้นที่ 2 (น้ำชานม)', price: 15, color: 'bg-indigo-500' }
+    ];
+
+    const BANKS = [
+      { id: 'kplus', name: 'K PLUS', color: 'bg-green-500', logo: 'K' },
+      { id: 'scb', name: 'SCB EASY', color: 'bg-purple-600', logo: 'SCB' },
+      { id: 'krungthai', name: 'Krungthai NEXT', color: 'bg-cyan-500', logo: 'KTB' },
+      { id: 'bbl', name: 'Bangkok Bank', color: 'bg-blue-800', logo: 'BBL' },
+      { id: 'krungsri', name: 'Krungsri App', color: 'bg-yellow-500', logo: 'KMA' }
+    ];
+
+    // Save state helper
+    function saveState() {
+      localStorage.setItem('vending_current_user', JSON.stringify(state.currentUser));
+      localStorage.setItem('vending_admin_data', JSON.stringify(state.adminData));
+    }
+
+    // --- STREAMING_CHUNK: Business Logic & Actions ---
+    window.setView = function(view) {
+      state.currentView = view;
+      render();
+    };
+
+    window.logout = function() {
+      state.currentUser = null;
+      saveState();
+      render();
+    };
+
+    window.handleRegisterOrLogin = function(event) {
+      event.preventDefault();
+      const name = event.target.name.value.trim();
+      const phone = event.target.phone.value.trim();
+
+      if (name && phone) {
+        const existingMember = state.adminData.members.find(m => m.phone === phone);
+
+        if (existingMember) {
+          const updatedMember = { ...existingMember, name };
+          state.currentUser = updatedMember;
+          state.adminData.members = state.adminData.members.map(m => m.phone === phone ? updatedMember : m);
+        } else {
+          const newMember = {
+            id: 'M' + Math.floor(Math.random() * 10000),
+            name,
+            phone,
+            bottlesBought: 0,
+            hasDiscount: false
+          };
+          state.currentUser = newMember;
+          state.adminData.members.push(newMember);
+        }
+        saveState();
+        window.setView('home');
+      }
+    };
+
+    window.selectWater = function(tierId) {
+      state.selectedWater = WATER_TIERS.find(t => t.id === tierId);
+      state.selectedBank = null;
+      window.setView('payment');
+    };
+
+    window.selectBank = function(bankId) {
+      state.selectedBank = bankId;
+      render();
+    };
+
+    window.confirmPayment = function() {
+      if (!state.selectedBank) return;
+
+      let discount = 0;
+      if (state.currentUser && state.currentUser.hasDiscount) {
+        discount = 2;
+      }
+      const finalPrice = state.selectedWater.price - discount;
+      const orderId = 'ORD' + Math.floor(Math.random() * 1000000);
+
+      // Update current user bottles bought
+      if (state.currentUser) {
+        state.currentUser.bottlesBought += 1;
+        state.currentUser.hasDiscount = (state.currentUser.bottlesBought % 3 === 0);
         
-        <div id="app-header" class="bg-blue-600 text-white p-4 shadow-md flex justify-between items-center rounded-b-2xl">
-            <div class="flex items-center gap-2">
-                <svg class="w-6 h-6 text-blue-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"></path></svg>
-                <h1 class="text-xl font-bold">ตู้กดน้ำอัตโนมัติ</h1>
+        // Update user inside administrative list
+        state.adminData.members = state.adminData.members.map(m => 
+          m.phone === state.currentUser.phone ? state.currentUser : m
+        );
+      }
+
+      // Update admin data
+      state.adminData.totalSales += finalPrice;
+      state.adminData.transactions.unshift({
+        id: orderId,
+        tier: state.selectedWater.name,
+        price: finalPrice,
+        time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      });
+
+      // Set Order Summary
+      state.orderSummary = {
+        orderId,
+        tier: state.selectedWater.name,
+        originalPrice: state.selectedWater.price,
+        discount,
+        finalPrice
+      };
+
+      saveState();
+      window.setView('success');
+    };
+
+    window.resetSystem = function() {
+      if (confirm('คุณต้องการล้างข้อมูลยอดขาย สมาชิก และประวัติทั้งหมดใช่หรือไม่?')) {
+        localStorage.removeItem('vending_current_user');
+        localStorage.removeItem('vending_admin_data');
+        state.currentUser = null;
+        state.adminData = { totalSales: 0, members: [], transactions: [] };
+        window.setView('home');
+      }
+    };
+
+    window.resetProcess = function() {
+      state.selectedWater = null;
+      state.selectedBank = null;
+      state.orderSummary = null;
+      window.setView('home');
+    };
+
+    // --- STREAMING_CHUNK: View Rendering UI Engine ---
+    function render() {
+      const container = document.getElementById('app-container');
+      container.innerHTML = ''; // Clear previous HTML
+
+      // 1. Render Header (Hide on Admin Dashboard)
+      if (state.currentView !== 'admin') {
+        const header = document.createElement('div');
+        header.className = "bg-blue-600 text-white p-4 shadow-md flex justify-between items-center rounded-b-2xl";
+        header.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="text-blue-200">${Icons.droplet}</span>
+            <h1 class="text-xl font-bold">ตู้กดน้ำอัตโนมัติ</h1>
+          </div>
+          <button onclick="window.setView('admin')" class="p-2 bg-blue-700 rounded-full hover:bg-blue-800 transition">
+            ${Icons.barChart}
+          </button>
+        `;
+        container.appendChild(header);
+      }
+
+      // 2. Render Main Body Container
+      const mainContent = document.createElement('div');
+      mainContent.className = "flex-1 overflow-y-auto";
+
+      // 3. Switch-Case Views
+      switch (state.currentView) {
+        case 'home':
+          mainContent.innerHTML = renderHomeView();
+          break;
+        case 'register':
+          mainContent.innerHTML = renderRegisterView();
+          break;
+        case 'payment':
+          mainContent.innerHTML = renderPaymentView();
+          break;
+        case 'success':
+          mainContent.innerHTML = renderSuccessView();
+          break;
+        case 'admin':
+          mainContent.innerHTML = renderAdminView();
+          break;
+      }
+
+      container.appendChild(mainContent);
+    }
+
+    // --- STREAMING_CHUNK: View Sub-templates ---
+    function renderHomeView() {
+      const discountBanner = !state.currentUser 
+        ? `
+          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-2xl border border-blue-100 flex flex-col items-center text-center space-y-3">
+            <div class="text-blue-500">${Icons.user}</div>
+            <div>
+              <h3 class="font-bold text-blue-900">สมาชิกรับสิทธิพิเศษ</h3>
+              <p class="text-sm text-blue-600">ซื้อครบ 3 ขวด รับส่วนลด 3 บาทในขวดถัดไป</p>
             </div>
-            <button onclick="switchView('admin')" class="p-2 bg-blue-700 rounded-full hover:bg-blue-800 transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2"></path></svg>
+            <button onclick="window.setView('register')" class="w-full bg-blue-600 text-white py-2 rounded-xl font-medium hover:bg-blue-700 transition active:scale-95">
+              สมัครสมาชิก / เข้าสู่ระบบ
             </button>
-        </div>
-
-        <div id="main-content" class="flex-1 overflow-y-auto">
+          </div>`
+        : `
+          <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-5 rounded-2xl text-white shadow-lg space-y-3">
+            <div class="flex justify-between items-center border-b border-blue-400/50 pb-3">
+              <div class="flex items-center gap-2">
+                ${Icons.userSmall}
+                <span class="font-bold">คุณ ${state.currentUser.name}</span>
+              </div>
+              <button onclick="window.logout()" class="text-xs bg-blue-700/50 px-2 py-1 rounded hover:bg-blue-700 transition">
+                ออกจากระบบ
+              </button>
             </div>
-
-    </div>
-
-    <script>
-        // --- การจัดการข้อมูล (จำถาวรใน Browser) ---
-        let currentUser = JSON.parse(localStorage.getItem('vending_current_user')) || null;
-        let adminData = JSON.parse(localStorage.getItem('vending_admin_data')) || {
-            totalSales: 0,
-            members: [],
-            transactions: []
-        };
-
-        let currentView = 'home';
-        let selectedWater = null;
-        let selectedBank = null;
-        let orderSummary = null;
-
-        const WATER_TIERS = [
-            { id: 1, name: 'น้ำดื่มชั้นที่ 1 (เย็นสดชื่น)', price: 10, color: 'bg-blue-400' },
-            { id: 2, name: 'น้ำดื่มชั้นที่ 2 (แร่ธาตุธรรมชาติ)', price: 15, color: 'bg-indigo-500' }
-        ];
-
-        const BANKS = [
-            { id: 'kplus', name: 'K PLUS', color: 'bg-green-500', logo: 'K' },
-            { id: 'scb', name: 'SCB EASY', color: 'bg-purple-600', logo: 'SCB' },
-            { id: 'krungthai', name: 'Krungthai NEXT', color: 'bg-cyan-500', logo: 'KTB' },
-            { id: 'bbl', name: 'Bangkok Bank', color: 'bg-blue-800', logo: 'BBL' }
-        ];
-
-        function saveToStorage() {
-            localStorage.setItem('vending_current_user', JSON.stringify(currentUser));
-            localStorage.setItem('vending_admin_data', JSON.stringify(adminData));
-        }
-
-        function switchView(view) {
-            currentView = view;
-            render();
-        }
-
-        // --- ระบบสมาชิก & ซื้อขาย ---
-        function handleLogin(event) {
-            event.preventDefault();
-            const name = document.getElementById('reg-name').value;
-            const phone = document.getElementById('reg-phone').value;
-
-            if (name && phone) {
-                let existingMember = adminData.members.find(m => m.phone === phone);
-                if (existingMember) {
-                    existingMember.name = name; // อัปเดตชื่อล่าสุด
-                    currentUser = existingMember;
-                } else {
-                    currentUser = {
-                        id: 'M' + Math.floor(Math.random() * 10000),
-                        name: name,
-                        phone: phone,
-                        bottlesBought: 0,
-                        hasDiscount: false
-                    };
-                    adminData.members.push(currentUser);
+            <div class="flex justify-between items-end">
+              <div>
+                <p class="text-sm text-blue-100">จำนวนสะสมทั้งหมด</p>
+                <p class="text-2xl font-bold">${state.currentUser.bottlesBought} <span class="text-base font-normal">ขวด</span></p>
+              </div>
+              <div class="text-right">
+                ${state.currentUser.hasDiscount 
+                  ? `<span class="bg-green-400 text-green-900 text-xs font-bold px-2 py-1 rounded-full animate-pulse">ส่วนลด 2 ฿ พร้อมใช้!</span>` 
+                  : `<span class="text-xs text-blue-200">อีก ${3 - (state.currentUser.bottlesBought % 3)} ขวดรับส่วนลด</span>`
                 }
-                saveToStorage();
-                switchView('home');
-            }
-        }
+              </div>
+            </div>
+            <div class="w-full bg-blue-900/30 rounded-full h-2 mt-2">
+              <div class="bg-green-400 h-2 rounded-full transition-all duration-500" style="width: ${(state.currentUser.bottlesBought % 3) * 33.33}%"></div>
+            </div>
+          </div>`;
 
-        function handleLogout() {
-            currentUser = null;
-            saveToStorage();
-            switchView('home');
-        }
+      const waterButtons = WATER_TIERS.map(tier => `
+        <button onclick="window.selectWater(${tier.id})" class="w-full flex items-center justify-between p-5 rounded-2xl shadow-sm border border-gray-100 transition-all hover:shadow-md active:scale-95 bg-white">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 ${tier.color} rounded-full flex items-center justify-center text-white shadow-inner">
+              ${Icons.droplet}
+            </div>
+            <div class="text-left">
+              <p class="font-bold text-gray-800">${tier.name}</p>
+              <p class="text-sm text-gray-500">ชั้นที่ ${tier.id}</p>
+            </div>
+          </div>
+          <div class="bg-blue-50 text-blue-700 font-bold px-4 py-2 rounded-xl">
+            ${tier.price} ฿
+          </div>
+        </button>
+      `).join('');
 
-        function selectWater(id) {
-            selectedWater = WATER_TIERS.find(w => w.id === id);
-            selectedBank = null;
-            switchView('payment');
-        }
+      return `
+        <div class="p-4 space-y-6 animate-fade-in">
+          <!-- Status Banner -->
+          <div class="bg-white p-4 rounded-2xl shadow-sm flex items-center justify-between border border-blue-50">
+            <span class="text-gray-600 font-medium">สถานะเครื่อง:</span>
+            <div class="flex items-center gap-2">
+              <span class="relative flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-green-400"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+              </span>
+              <span class="font-bold text-green-600">พร้อมใช้งาน</span>
+            </div>
+          </div>
 
-        function selectBank(bankId) {
-            selectedBank = bankId;
-            render(); // อัปเดตเพื่อแสดง QR Code
-        }
+          <!-- Loyalty Section -->
+          ${discountBanner}
 
-        function confirmPayment() {
-            let discount = (currentUser && currentUser.hasDiscount) ? 2 : 0;
-            let finalPrice = selectedWater.price - discount;
-            let orderId = 'ORD' + Math.floor(Math.random() * 1000000);
+          <!-- Product Section -->
+          <div class="space-y-4">
+            <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+              <span class="text-blue-500">${Icons.droplet}</span> เลือกน้ำที่ต้องการ
+            </h2>
+            ${waterButtons}
+          </div>
+        </div>
+      `;
+    }
 
-            if (currentUser) {
-                currentUser.bottlesBought += 1;
-                currentUser.hasDiscount = (currentUser.bottlesBought % 3 === 0);
-                // อัปเดตข้อมูลในลิสต์สมาชิกหลัก
-                adminData.members = adminData.members.map(m => m.phone === currentUser.phone ? currentUser : m);
-            }
+    function renderRegisterView() {
+      return `
+        <div class="p-4 space-y-6 animate-fade-in h-full">
+          <button onclick="window.setView('home')" class="flex items-center text-blue-600 gap-1 mb-4 font-medium">
+            ${Icons.arrowLeft} กลับหน้าหลัก
+          </button>
+          
+          <div class="text-center space-y-2 mb-8">
+            <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-blue-600">
+              ${Icons.user}
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">สมัครสมาชิก / เข้าสู่ระบบ</h2>
+            <p class="text-gray-500 text-sm">กรอกเบอร์เดิมเพื่อดึงแต้มสะสมเก่าได้เลย</p>
+          </div>
 
-            adminData.totalSales += finalPrice;
-            adminData.transactions.unshift({
-                id: orderId,
-                tier: selectedWater.name,
-                price: finalPrice,
-                time: new Date().toLocaleTimeString('th-TH')
-            });
+          <form onsubmit="window.handleRegisterOrLogin(event)" class="space-y-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อ-นามสกุล</label>
+              <input type="text" name="name" required class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="เช่น สมชาย ใจดี">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">เบอร์โทรศัพท์</label>
+              <input type="tel" name="phone" required pattern="[0-9]{10}" class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="08X-XXX-XXXX">
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white font-bold rounded-xl py-3 mt-4 hover:bg-blue-700 transition active:scale-95 shadow-md">
+              เข้าสู่ระบบ / ยืนยันข้อมูล
+            </button>
+          </form>
+        </div>
+      `;
+    }
 
-            orderSummary = { orderId, tier: selectedWater.name, originalPrice: selectedWater.price, discount, finalPrice };
+    function renderPaymentView() {
+      const isDiscountApplied = state.currentUser && state.currentUser.hasDiscount;
+      const finalPrice = state.selectedWater.price - (isDiscountApplied ? 2 : 0);
+
+      const bankButtons = BANKS.map(bank => {
+        const isSelected = state.selectedBank === bank.id;
+        return `
+          <button onclick="window.selectBank('${bank.id}')" class="p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+            isSelected ? 'border-blue-500 bg-blue-50 shadow-md scale-[1.02]' : 'border-gray-100 bg-white hover:border-blue-200'
+          }">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-xs ${bank.color}">
+              ${bank.logo}
+            </div>
+            <span class="text-xs font-semibold text-gray-700">${bank.name}</span>
+          </button>
+        `;
+      }).join('');
+
+      const qrSection = state.selectedBank 
+        ? `
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center space-y-4 animate-slide-up mt-6">
+            <p class="text-sm text-gray-500 font-medium">สแกน QR Code เพื่อชำระเงิน</p>
+            <div class="w-48 h-48 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center relative overflow-hidden">
+               <div class="text-gray-400 opacity-50">${Icons.qrCode}</div>
+               <div class="absolute top-0 w-full h-1 bg-blue-400/50 animate-scan-line"></div>
+            </div>
+            <p class="font-bold text-blue-600 text-2xl">${finalPrice} บาท</p>
             
-            saveToStorage();
-            switchView('success');
-        }
+            <button onclick="window.confirmPayment()" class="w-full bg-blue-600 text-white font-bold rounded-xl py-3 mt-2 flex items-center justify-center gap-2 hover:bg-blue-700 transition active:scale-95 shadow-md">
+              ยืนยันการชำระเงิน
+            </button>
+          </div>`
+        : '';
 
-        function resetSystem() {
-            if (confirm('คุณต้องการล้างข้อมูลยอดขาย สมาชิก และประวัติทั้งหมดใช่หรือไม่?')) {
-                localStorage.clear();
-                currentUser = null;
-                adminData = { totalSales: 0, members: [], transactions: [] };
-                switchView('home');
-            }
-        }
+      return `
+        <div class="p-4 space-y-6 animate-fade-in pb-24">
+          <button onclick="window.setView('home')" class="flex items-center text-blue-600 gap-1 font-medium">
+            ${Icons.arrowLeft} ย้อนกลับ
+          </button>
 
-        // --- ฟังก์ชันการ Render หน้าจอ (UI) ---
-        function render() {
-            const content = document.getElementById('main-content');
-            const header = document.getElementById('app-header');
+          <!-- Order Bill -->
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+            <h3 class="font-bold text-gray-800 border-b pb-2 flex items-center gap-2 text-md">
+              <span class="text-blue-500">${Icons.activity}</span> สรุปรายการสั่งซื้อ
+            </h3>
+            <div class="flex justify-between items-center text-gray-600 font-medium">
+              <span>${state.selectedWater.name}</span>
+              <span>${state.selectedWater.price} ฿</span>
+            </div>
             
-            // ซ่อนหรือแสดง Header ตามหน้าจอ
-            header.style.display = (currentView === 'admin') ? 'none' : 'flex';
-
-            if (currentView === 'home') {
-                let memberSection = `
-                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-2xl border border-blue-100 flex flex-col items-center text-center space-y-3">
-                        <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                        <div>
-                            <h3 class="font-bold text-blue-900">สมาชิกรับสิทธิพิเศษ</h3>
-                            <p class="text-sm text-blue-600">ซื้อครบ 3 ขวด รับส่วนลด 2 บาทในขวดถัดไป</p>
-                        </div>
-                        <button onclick="switchView('register')" class="w-full bg-blue-600 text-white py-2 rounded-xl font-medium hover:bg-blue-700 transition">
-                            สมัครสมาชิก / เข้าสู่ระบบ
-                        </button>
-                    </div>`;
-
-                if (currentUser) {
-                    let progress = (currentUser.bottlesBought % 3) * 33.33;
-                    let nextCount = 3 - (currentUser.bottlesBought % 3);
-                    memberSection = `
-                        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-5 rounded-2xl text-white shadow-lg space-y-3">
-                            <div class="flex justify-between items-center border-b border-blue-400/50 pb-3">
-                                <div class="flex items-center gap-2">
-                                    <span class="font-bold">คุณ ${currentUser.name}</span>
-                                </div>
-                                <button onclick="handleLogout()" class="text-xs bg-blue-700/50 px-2 py-1 rounded hover:bg-blue-800">ออกจากระบบ</button>
-                            </div>
-                            <div class="flex justify-between items-end">
-                                <div>
-                                    <p class="text-sm text-blue-100">ซื้อสะสมทั้งหมด</p>
-                                    <p class="text-2xl font-bold">${currentUser.bottlesBought} <span class="text-base font-normal">ขวด</span></p>
-                                </div>
-                                <div>
-                                    ${currentUser.hasDiscount ? 
-                                        `<span class="bg-green-400 text-green-900 text-xs font-bold px-2 py-1 rounded-full animate-pulse">ส่วนลด 2 ฿ พร้อมใช้!</span>` : 
-                                        `<span class="text-xs text-blue-200">อีก ${nextCount} ขวด รับส่วนลด</span>`}
-                                </div>
-                            </div>
-                            <div class="w-full bg-blue-900/30 rounded-full h-2 mt-2">
-                                <div class="bg-green-400 h-2 rounded-full" style="width: ${progress}%"></div>
-                            </div>
-                        </div>`;
-                }
-
-                let waterButtons = WATER_TIERS.map(tier => `
-                    <button onclick="selectWater(${tier.id})" class="w-full flex items-center justify-between p-5 rounded-2xl shadow-sm border border-gray-100 bg-white hover:shadow-md transition active:scale-95 text-left">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 ${tier.color} rounded-full flex items-center justify-center text-white">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"></path></svg>
-                            </div>
-                            <div>
-                                <p class="font-bold text-gray-800">${tier.name}</p>
-                                <p class="text-sm text-gray-500">ชั้นที่ ${tier.id}</p>
-                            </div>
-                        </div>
-                        <div class="bg-blue-50 text-blue-700 font-bold px-4 py-2 rounded-xl">${tier.price} ฿</div>
-                    </button>
-                `).join('');
-
-                content.innerHTML = `
-                    <div class="p-4 space-y-6 animate-fade-in">
-                        <div class="bg-white p-4 rounded-2xl shadow-sm flex items-center justify-between border border-blue-50">
-                            <span class="text-gray-600 font-medium">สถานะเครื่อง:</span>
-                            <span class="font-bold text-green-600 flex items-center gap-1">● พร้อมใช้งาน</span>
-                        </div>
-                        ${memberSection}
-                        <div class="space-y-4">
-                            <h2 class="text-lg font-bold text-gray-800">💧 เลือกน้ำที่ต้องการ</h2>
-                            ${waterButtons}
-                        </div>
-                    </div>`;
-
-            } else if (currentView === 'register') {
-                content.innerHTML = `
-                    <div class="p-4 space-y-6 animate-fade-in">
-                        <button onclick="switchView('home')" class="text-blue-600 flex items-center gap-1"><- กลับหน้าหลัก</button>
-                        <div class="text-center space-y-2">
-                            <h2 class="text-2xl font-bold text-gray-800">สมัครสมาชิก / เข้าสู่ระบบ</h2>
-                            <p class="text-gray-500 text-sm">ใช้เบอร์เดิมเพื่อดึงแต้มสะสมเก่าได้เลย</p>
-                        </div>
-                        <form onsubmit="handleLogin(event)" class="space-y-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อ-นามสกุล</label>
-                                <input type="text" id="reg-name" required class="w-full border rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="เช่น สมชาย ใจดี">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">เบอร์โทรศัพท์</label>
-                                <input type="tel" id="reg-phone" pattern="[0-9]{10}" required class="w-full border rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="08XXXXXXXX">
-                            </div>
-                            <button type="submit" class="w-full bg-blue-600 text-white font-bold rounded-xl py-3 mt-2 hover:bg-blue-700">ยืนยันข้อมูล</button>
-                        </form>
-                    </div>`;
-
-            } else if (currentView === 'payment') {
-                let discount = (currentUser && currentUser.hasDiscount) ? 2 : 0;
-                let finalPrice = selectedWater.price - discount;
-
-                let bankButtons = BANKS.map(bank => `
-                    <button onclick="selectBank('${bank.id}')" class="p-3 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${selectedBank === bank.id ? 'border-blue-500 bg-blue-50' : 'border-gray-100 bg-white'}">
-                        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold ${bank.color}">${bank.logo}</div>
-                        <span class="text-xs font-medium text-gray-700">${bank.name}</span>
-                    </button>
-                `).join('');
-
-                let qrSection = '';
-                if (selectedBank) {
-                    qrSection = `
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center space-y-4 mt-4 animate-fade-in">
-                            <p class="text-sm text-gray-500">จำลองการสแกน QR Code เพื่อชำระเงิน</p>
-                            <div class="w-44 h-44 bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center relative overflow-hidden">
-                                <span class="text-gray-400 font-bold text-center text-xs p-4">QR CODE SYSTEM READY</span>
-                                <div class="absolute top-0 w-full h-1 bg-blue-500 animate-scan"></div>
-                            </div>
-                            <p class="font-bold text-blue-600 text-xl">${finalPrice} บาท</p>
-                            <button onclick="confirmPayment()" class="w-full bg-blue-600 text-white font-bold rounded-xl py-3 hover:bg-blue-700">✓ ยืนยันว่าสแกนจ่ายแล้ว</button>
-                        </div>`;
-                }
-
-                content.innerHTML = `
-                    <div class="p-4 space-y-4 animate-fade-in">
-                        <button onclick="switchView('home')" class="text-blue-600"><- ย้อนกลับ</button>
-                        <div class="bg-white p-5 rounded-2xl border border-gray-100 space-y-3">
-                            <h3 class="font-bold text-gray-800 border-b pb-2">📋 สรุปรายการสั่งซื้อ</h3>
-                            <div class="flex justify-between text-sm text-gray-600"><span>${selectedWater.name}</span><span>${selectedWater.price} ฿</span></div>
-                            ${discount > 0 ? `<div class="flex justify-between text-sm text-green-600 bg-green-50 p-2 rounded"><span>ส่วนลดสมาชิก</span><span>-2 ฿</span></div>` : ''}
-                            <div class="flex justify-between font-bold text-lg pt-2 border-t"><span>ยอดชำระสุทธิ</span><span class="text-blue-600 text-xl">${finalPrice} ฿</span></div>
-                        </div>
-                        <div class="space-y-3">
-                            <h3 class="font-bold text-gray-800">เลือกแอปธนาคาร</h3>
-                            <div class="grid grid-cols-2 gap-3">${bankButtons}</div>
-                        </div>
-                        ${qrSection}
-                    </div>`;
-
-            } else if (currentView === 'success') {
-                content.innerHTML = `
-                    <div class="p-6 space-y-6 flex flex-col items-center justify-center text-center animate-fade-in min-h-[70vh]">
-                        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center text-green-500 text-4xl font-bold">✓</div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-gray-800">ชำระเงินสำเร็จ!</h2>
-                            <p class="text-gray-500 text-sm mt-1">ตู้กำลังจ่ายน้ำให้คุณ กรุณารอสักครู่...</p>
-                        </div>
-                        <div class="w-full bg-white p-5 rounded-2xl border text-left space-y-2">
-                            <div class="flex justify-between text-xs border-b pb-2 text-gray-500"><span>หมายเลข</span><span>${orderSummary.orderId}</span></div>
-                            <div class="flex justify-between text-sm pt-1"><span>รายการ</span><span class="font-medium">${orderSummary.tier}</span></div>
-                            ${orderSummary.discount > 0 ? `<div class="flex justify-between text-sm text-green-600"><span>ส่วนลดสมาชิก</span><span>-${orderSummary.discount} ฿</span></div>` : ''}
-                            <div class="flex justify-between font-bold border-t pt-2 text-blue-600"><span>จ่ายเงินแล้ว</span><span>${orderSummary.finalPrice} ฿</span></div>
-                        </div>
-                        <button onclick="switchView('home')" class="w-full bg-gray-200 text-gray-700 font-bold rounded-xl py-3 hover:bg-gray-300">กลับสู่หน้าหลัก</button>
-                    </div>`;
-
-            } else if (currentView === 'admin') {
-                let txList = adminData.transactions.map(tx => `
-                    <div class="p-4 flex justify-between items-center bg-white rounded-xl border border-gray-100">
-                        <div>
-                            <p class="font-medium text-gray-800 text-sm">${tx.id}</p>
-                            <p class="text-xs text-gray-400">${tx.tier} • ${tx.time}</p>
-                        </div>
-                        <div class="font-bold text-blue-600">+${tx.price} ฿</div>
-                    </div>
-                `).join('');
-
-                if(adminData.transactions.length === 0) {
-                    txList = `<p class="text-center text-gray-400 py-8 text-sm">ยังไม่มีรายการขายในระบบ</p>`;
-                }
-
-                content.innerHTML = `
-                    <div class="p-4 space-y-6 animate-fade-in bg-gray-50 min-h-screen">
-                        <div class="flex justify-between items-center">
-                            <button onclick="switchView('home')" class="text-blue-600"><- กลับหน้าหลัก</button>
-                            <button onclick="resetSystem()" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-xl text-xs font-bold border border-red-200">ล้างข้อมูลระบบ</button>
-                        </div>
-                        <h2 class="text-2xl font-bold text-gray-800">📊 Admin Dashboard</h2>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-white p-4 rounded-2xl border border-gray-100">
-                                <p class="text-gray-400 text-xs mb-1">ยอดขายรวม</p>
-                                <p class="text-2xl font-bold text-blue-600">${adminData.totalSales} <span class="text-xs font-normal text-gray-400">บาท</span></p>
-                            </div>
-                            <div class="bg-white p-4 rounded-2xl border border-gray-100">
-                                <p class="text-gray-400 text-xs mb-1">สมาชิกทั้งหมด</p>
-                                <p class="text-2xl font-bold text-indigo-600">${adminData.members.length} <span class="text-xs font-normal text-gray-400">คน</span></p>
-                            </div>
-                        </div>
-                        <div class="space-y-3">
-                            <h3 class="font-bold text-gray-800">📜 ประวัติการขายล่าสุด</h3>
-                            <div class="space-y-2 max-h-80 overflow-y-auto">${txList}</div>
-                        </div>
-                    </div>`;
+            ${isDiscountApplied 
+              ? `
+              <div class="flex justify-between items-center text-green-600 bg-green-50 p-2.5 rounded-xl font-medium">
+                <span>ส่วนลดสมาชิก (ครบ 3 ขวด)</span>
+                <span>-2 ฿</span>
+              </div>`
+              : ''
             }
-        }
+            
+            <div class="flex justify-between items-center font-bold text-lg pt-2 border-t">
+              <span>ยอดชำระสุทธิ</span>
+              <span class="text-blue-600 text-2xl">${finalPrice} ฿</span>
+            </div>
+          </div>
 
-        // เริ่มต้นรันหน้าแรก
-        render();
-    </script>
+          <!-- Bank Chooser -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-gray-800">เลือกแอปธนาคารสำหรับสแกนจ่าย</h3>
+            <div class="grid grid-cols-2 gap-3">
+              ${bankButtons}
+            </div>
+          </div>
+
+          <!-- Scan Panel -->
+          ${qrSection}
+        </div>
+      `;
+    }
+
+    function renderSuccessView() {
+      const summary = state.orderSummary;
+      return `
+        <div class="p-6 space-y-8 flex flex-col items-center justify-center text-center animate-fade-in min-h-[70vh]">
+          <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-2 animate-bounce-once text-green-500">
+            ${Icons.checkCircle}
+          </div>
+          
+          <div>
+            <h2 class="text-2xl font-bold text-gray-800">ชำระเงินสำเร็จ!</h2>
+            <p class="text-gray-500 mt-1 font-medium">กำลังจ่ายน้ำ กรุณารอสักครู่...</p>
+          </div>
+
+          <div class="w-full bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-left space-y-3">
+            <div class="flex justify-between text-sm border-b pb-2 font-medium">
+              <span class="text-gray-500">หมายเลขรายการ</span>
+              <span class="font-semibold text-gray-800">${summary?.orderId}</span>
+            </div>
+            <div class="flex justify-between text-sm border-b pb-2 font-medium">
+              <span class="text-gray-500">รายการที่เลือก</span>
+              <span class="font-semibold text-gray-800">${summary?.tier}</span>
+            </div>
+            ${summary?.discount > 0 
+              ? `
+              <div class="flex justify-between text-sm border-b pb-2 font-medium">
+                <span class="text-gray-500">ส่วนลดสมาชิก</span>
+                <span class="font-semibold text-green-600">-${summary?.discount} ฿</span>
+              </div>`
+              : ''
+            }
+            <div class="flex justify-between text-base font-bold pt-1">
+              <span class="text-gray-800">ยอดเงินที่ชำระ</span>
+              <span class="text-blue-600">${summary?.finalPrice} ฿</span>
+            </div>
+          </div>
+
+          <button onclick="window.resetProcess()" class="w-full bg-blue-600 text-white font-bold rounded-xl py-3 mt-4 hover:bg-blue-700 transition active:scale-95 shadow-md">
+            กลับสู่หน้าหลัก
+          </button>
+        </div>
+      `;
+    }
+
+    function renderAdminView() {
+      const txRows = state.adminData.transactions.length === 0 
+        ? `<p class="text-center text-gray-400 py-8 text-sm font-medium">ยังไม่มีรายการขาย</p>`
+        : state.adminData.transactions.map(tx => `
+          <div class="p-4 flex justify-between items-center hover:bg-gray-50 transition">
+            <div>
+              <p class="font-bold text-gray-800 text-sm">${tx.id}</p>
+              <p class="text-xs text-gray-500 font-medium">${tx.tier} • ${tx.time}</p>
+            </div>
+            <div class="font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-lg">
+              +${tx.price} ฿
+            </div>
+          </div>
+        `).join('');
+
+      return `
+        <div class="p-4 space-y-6 animate-fade-in h-full bg-gray-50">
+          <div class="flex justify-between items-center mb-2">
+            <button onclick="window.setView('home')" class="flex items-center text-blue-600 gap-1 font-medium">
+              ${Icons.arrowLeft} กลับหน้าหลัก
+            </button>
+            <button onclick="window.resetSystem()" class="flex items-center gap-1 bg-red-50 text-red-600 px-3 py-1.5 rounded-xl text-xs font-semibold border border-red-200 hover:bg-red-100 transition shadow-sm">
+              <span class="mr-1">${Icons.trash}</span> ล้างข้อมูลระบบ
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2 mb-6">
+            <span class="text-blue-600">${Icons.barChart}</span>
+            <h2 class="text-2xl font-bold text-gray-800">Admin Dashboard</h2>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-center">
+              <p class="text-gray-500 text-sm mb-1 font-medium">ยอดขายรวม</p>
+              <p class="text-3xl font-bold text-blue-600">${state.adminData.totalSales} <span class="text-sm font-normal text-gray-500">บาท</span></p>
+            </div>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-center">
+              <p class="text-gray-500 text-sm mb-1 font-medium">สมาชิกทั้งหมด</p>
+              <p class="text-3xl font-bold text-indigo-600">${state.adminData.members?.length || 0} <span class="text-sm font-normal text-gray-500">คน</span></p>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mt-6 shadow-sm">
+            <div class="p-4 border-b border-gray-100 flex items-center gap-2 bg-gray-50/50">
+              <span class="text-gray-500">${Icons.history}</span>
+              <h3 class="font-bold text-gray-800">ประวัติการขายล่าสุด</h3>
+            </div>
+            <div class="divide-y divide-gray-100 max-h-60 overflow-y-auto">
+              ${txRows}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // --- STREAMING_CHUNK: Application Initialization ---
+    // Start rendering on window load
+    window.onload = function() {
+      render();
+    };
+  </script>
 </body>
 </html>
