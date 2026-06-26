@@ -553,5 +553,28 @@
       render();
     };
   </script>
-</body>
+<!-- เปิดใช้งาน Firebase Script แบบโมดูล -->
+<script type="module">
+  // 1. ดึงฟังก์ชันเชื่อมต่อจากตัวระบบออนไลน์ของ Firebase
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  
+  // 2. ดึงฐานข้อมูล Firestore มาเตรียมใช้งาน (สำหรับเก็บค่าปริมาณน้ำหรือสถิติต่างๆ)
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // 3. วางโค้ดที่คุณเพิ่งได้มาจากหน้าจอ Firebase (เอามาวางแทนที่ตรงนี้ทั้งหมดเลยครับ)
+  const firebaseConfig = {
+  apiKey: "AIzaSyA9hWjeFmorWdQn5dGu1ut0BMlvaOLK-zY",
+  authDomain: "smartwater1-5e117.firebaseapp.com",
+  projectId: "smartwater1-5e117",
+  storageBucket: "smartwater1-5e117.firebasestorage.app",
+  messagingSenderId: "660889405048",
+  appId: "1:660889405048:web:db72a16ca75577c8184f8d",
+  measurementId: "G-EQMM2X3KSC"
+};
+  // 4. สั่งให้ระบบเริ่มเชื่อมต่อ
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  console.log("Firebase พร้อมทำงานร่วมกับสมาร์ทวอเตอร์แล้ว!");
+</script></body>
 </html>
