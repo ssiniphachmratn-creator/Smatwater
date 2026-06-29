@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ตู้กดน้ำอัตโนมัติ (Water Vending Machine)</title>
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts (Sarabun) -->
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body {
@@ -39,10 +37,8 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex justify-center items-center">
 
-  <!-- Mobile Device Container Simulation -->
   <div class="w-full max-w-md bg-white min-h-screen shadow-2xl relative overflow-hidden flex flex-col" id="app-container">
-    <!-- Dynamic content will render here -->
-  </div>
+    </div>
 
   <script>
     // Inline SVG Icons definition to keep it zero-dependency
@@ -60,7 +56,6 @@
     };
 
     // --- STREAMING_CHUNK: State Management ---
-    // Initialize state from LocalStorage (identical keys to React version)
     const state = {
       currentView: 'home',
       currentUser: JSON.parse(localStorage.getItem('vending_current_user')) || null,
@@ -87,13 +82,11 @@
       { id: 'krungsri', name: 'Krungsri App', color: 'bg-yellow-500', logo: 'KMA' }
     ];
 
-    // Save state helper
     function saveState() {
       localStorage.setItem('vending_current_user', JSON.stringify(state.currentUser));
       localStorage.setItem('vending_admin_data', JSON.stringify(state.adminData));
     }
 
-    // --- STREAMING_CHUNK: Business Logic & Actions ---
     window.setView = function(view) {
       state.currentView = view;
       render();
@@ -154,27 +147,24 @@
       const finalPrice = state.selectedWater.price - discount;
       const orderId = 'ORD' + Math.floor(Math.random() * 1000000);
 
-      // Update current user bottles bought
       if (state.currentUser) {
         state.currentUser.bottlesBought += 1;
         state.currentUser.hasDiscount = (state.currentUser.bottlesBought % 3 === 0);
         
-        // Update user inside administrative list
         state.adminData.members = state.adminData.members.map(m => 
           m.phone === state.currentUser.phone ? state.currentUser : m
         );
       }
 
-      // Update admin data
       state.adminData.totalSales += finalPrice;
-      state.adminData.transactions.unshift({
+      const newTransaction = {
         id: orderId,
         tier: state.selectedWater.name,
         price: finalPrice,
         time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-      });
+      };
+      state.adminData.transactions.unshift(newTransaction);
 
-      // Set Order Summary
       state.orderSummary = {
         orderId,
         tier: state.selectedWater.name,
@@ -184,6 +174,12 @@
       };
 
       saveState();
+
+      // สั่งยิงบันทึกประวัติธุรกรรมเพิ่มเติมลง Firebase หลังบ้านผ่านโมดูลหลักด้านล่าง
+      if (window.syncTransactionToFirebase) {
+        window.syncTransactionToFirebase(newTransaction, state.currentUser);
+      }
+
       window.setView('success');
     };
 
@@ -204,12 +200,10 @@
       window.setView('home');
     };
 
-    // --- STREAMING_CHUNK: View Rendering UI Engine ---
     function render() {
       const container = document.getElementById('app-container');
-      container.innerHTML = ''; // Clear previous HTML
+      container.innerHTML = ''; 
 
-      // 1. Render Header (Hide on Admin Dashboard)
       if (state.currentView !== 'admin') {
         const header = document.createElement('div');
         header.className = "bg-blue-600 text-white p-4 shadow-md flex justify-between items-center rounded-b-2xl";
@@ -225,11 +219,9 @@
         container.appendChild(header);
       }
 
-      // 2. Render Main Body Container
       const mainContent = document.createElement('div');
       mainContent.className = "flex-1 overflow-y-auto";
 
-      // 3. Switch-Case Views
       switch (state.currentView) {
         case 'home':
           mainContent.innerHTML = renderHomeView();
@@ -251,7 +243,6 @@
       container.appendChild(mainContent);
     }
 
-    // --- STREAMING_CHUNK: View Sub-templates ---
     function renderHomeView() {
       const discountBanner = !state.currentUser 
         ? `
@@ -312,7 +303,6 @@
 
       return `
         <div class="p-4 space-y-6 animate-fade-in">
-          <!-- Status Banner -->
           <div class="bg-white p-4 rounded-2xl shadow-sm flex items-center justify-between border border-blue-50">
             <span class="text-gray-600 font-medium">สถานะเครื่อง:</span>
             <div class="flex items-center gap-2">
@@ -324,10 +314,8 @@
             </div>
           </div>
 
-          <!-- Loyalty Section -->
           ${discountBanner}
 
-          <!-- Product Section -->
           <div class="space-y-4">
             <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
               <span class="text-blue-500">${Icons.droplet}</span> เลือกน้ำที่ต้องการ
@@ -344,7 +332,7 @@
           <button onclick="window.setView('home')" class="flex items-center text-blue-600 gap-1 mb-4 font-medium">
             ${Icons.arrowLeft} กลับหน้าหลัก
           </button>
-          
+           
           <div class="text-center space-y-2 mb-8">
             <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-blue-600">
               ${Icons.user}
@@ -388,18 +376,23 @@
         `;
       }).join('');
 
+      // ดึงรูปภาพ PromptPay QR Code ไดนามิกอัตโนมัติอ้างอิงจากยอดเงินและเบอร์พร้อมเพย์ของคุณ
       const qrSection = state.selectedBank 
         ? `
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center space-y-4 animate-slide-up mt-6">
-            <p class="text-sm text-gray-500 font-medium">สแกน QR Code เพื่อชำระเงิน</p>
-            <div class="w-48 h-48 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center relative overflow-hidden">
-               <div class="text-gray-400 opacity-50">${Icons.qrCode}</div>
+            <p class="text-sm text-gray-500 font-medium">สแกน QR Code ผ่านหน้าตู้เพื่อชำระเงิน</p>
+            <div class="flex justify-center mb-1">
+              <img src="https://promptpay.io/static/images/lib/PromptPay-logo.png" alt="PromptPay" class="h-6 object-contain">
+            </div>
+            <div class="w-48 h-48 p-2 bg-white border-2 border-dashed border-blue-400 rounded-xl flex items-center justify-center relative overflow-hidden shadow-inner">
+               <img src="https://promptpay.io/0841041080/${finalPrice}.png" alt="PromptPay QR Code" class="w-full h-full object-contain">
                <div class="absolute top-0 w-full h-1 bg-blue-400/50 animate-scan-line"></div>
             </div>
             <p class="font-bold text-blue-600 text-2xl">${finalPrice} บาท</p>
-            
+            <p class="text-xs text-gray-400 -mt-2">บัญชีปลายทาง: ตู้กดน้ำ Smart Water</p>
+             
             <button onclick="window.confirmPayment()" class="w-full bg-blue-600 text-white font-bold rounded-xl py-3 mt-2 flex items-center justify-center gap-2 hover:bg-blue-700 transition active:scale-95 shadow-md">
-              ยืนยันการชำระเงิน
+              ยืนยันการชำระเงิน (จำลองเงินเข้า)
             </button>
           </div>`
         : '';
@@ -410,7 +403,6 @@
             ${Icons.arrowLeft} ย้อนกลับ
           </button>
 
-          <!-- Order Bill -->
           <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
             <h3 class="font-bold text-gray-800 border-b pb-2 flex items-center gap-2 text-md">
               <span class="text-blue-500">${Icons.activity}</span> สรุปรายการสั่งซื้อ
@@ -419,7 +411,7 @@
               <span>${state.selectedWater.name}</span>
               <span>${state.selectedWater.price} ฿</span>
             </div>
-            
+             
             ${isDiscountApplied 
               ? `
               <div class="flex justify-between items-center text-green-600 bg-green-50 p-2.5 rounded-xl font-medium">
@@ -428,22 +420,20 @@
               </div>`
               : ''
             }
-            
+             
             <div class="flex justify-between items-center font-bold text-lg pt-2 border-t">
               <span>ยอดชำระสุทธิ</span>
               <span class="text-blue-600 text-2xl">${finalPrice} ฿</span>
             </div>
           </div>
 
-          <!-- Bank Chooser -->
           <div class="space-y-3">
-            <h3 class="font-bold text-gray-800">เลือกแอปธนาคารสำหรับสแกนจ่าย</h3>
+            <h3 class="font-bold text-gray-800">เลือกแอปธนาคารลูกค้าสำหรับสแกนจ่าย</h3>
             <div class="grid grid-cols-2 gap-3">
               ${bankButtons}
             </div>
           </div>
 
-          <!-- Scan Panel -->
           ${qrSection}
         </div>
       `;
@@ -456,7 +446,7 @@
           <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-2 animate-bounce-once text-green-500">
             ${Icons.checkCircle}
           </div>
-          
+           
           <div>
             <h2 class="text-2xl font-bold text-gray-800">ชำระเงินสำเร็จ!</h2>
             <p class="text-gray-500 mt-1 font-medium">กำลังจ่ายน้ำ กรุณารอสักครู่...</p>
@@ -547,69 +537,96 @@
       `;
     }
 
-    // --- STREAMING_CHUNK: Application Initialization ---
-    // Start rendering on window load
     window.onload = function() {
       render();
     };
   </script>
-<!-- เปิดใช้งาน Firebase Script แบบโมดูล -->
-<script type="module">
-  // 1. ดึงฟังก์ชันเชื่อมต่อจากตัวระบบออนไลน์ของ Firebase
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  
-  // 2. ดึงฐานข้อมูล Firestore มาเตรียมใช้งาน (เพิ่ม collection และ addDoc สำหรับส่งค่า)
-  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  // 3. วางโค้ดที่คุณเพิ่งได้มาจากหน้าจอ Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyA9hWjeFmorWdQn5dGu1ut0BMlvaOLK-zY",
-    authDomain: "smartwater1-5e117.firebaseapp.com",
-    projectId: "smartwater1-5e117",
-    storageBucket: "smartwater1-5e117.firebasestorage.app",
-    messagingSenderId: "660889405048",
-    appId: "1:660889405048:web:db72a16ca75577c8184f8d",
-    measurementId: "G-EQMM2X3KSC"
-  };
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, doc, updateDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  // 4. สั่งให้ระบบเริ่มเชื่อมต่อ
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+    const firebaseConfig = {
+      apiKey: "AIzaSyA9hWjeFmorWdQn5dGu1ut0BMlvaOLK-zY",
+      authDomain: "smartwater1-5e117.firebaseapp.com",
+      projectId: "smartwater1-5e117",
+      storageBucket: "smartwater1-5e117.firebasestorage.app",
+      messagingSenderId: "660889405048",
+      appId: "1:660889405048:web:db72a16ca75577c8184f8d",
+      measurementId: "G-EQMM2X3KSC"
+    };
 
-  console.log("Firebase พร้อมทำงานร่วมกับสมาร์ทวอเตอร์แล้ว!");
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    console.log("Firebase พร้อมทำงานร่วมกับสมาร์ทวอเตอร์และระบบธนาคารแล้ว!");
 
-  // 5. เชื่อมต่อเข้ากับปุ่มและระบบสมัครสมาชิกของหน้าเว็บเดิมอัตโนมัติ
-  // สร้างฟังก์ชันบันทึกข้อมูลเพื่อดึงไปใช้กับฟังก์ชันจัดเก็บหลักด้านบน
-  window.saveMemberToFirebase = async function(name, phone) {
-    try {
-      const docRef = await addDoc(collection(db, "members"), {
-        name: name,
-        phone: phone,
-        bottlesBought: 0,
-        hasDiscount: false,
-        createdAt: new Date().toISOString()
-      });
-      console.log("บันทึกข้อมูลสมาชิกไปยัง Firebase สำเร็จ! ID:", docRef.id);
-    } catch (error) {
-      console.error("เกิดข้อผิดพลาดในการบันทึกข้อมูลไป Firebase: ", error);
-    }
-  };
+    // 1. ระบบบันทึกข้อมูลสมาชิกใหม่ยิงลง Firestore
+    window.saveMemberToFirebase = async function(name, phone) {
+      try {
+        const q = query(collection(db, "members"), window.where ? where("phone", "==", phone) : where("phone", "==", phone));
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+          const docRef = await addDoc(collection(db, "members"), {
+            name: name,
+            phone: phone,
+            bottlesBought: 0,
+            hasDiscount: false,
+            createdAt: new Date().toISOString()
+          });
+          console.log("บันทึกข้อมูลสมาชิกใหม่ไปยัง Firebase สำเร็จ! ID:", docRef.id);
+        } else {
+          console.log("พบข้อมูลผู้ใช้เดิมบนฐานข้อมูลออนไลน์แล้ว");
+        }
+      } catch (error) {
+        console.error("เกิดข้อผิดพลาดในการบันทึกข้อมูลไป Firebase: ", error);
+      }
+    };
 
-  // ดึงฟังก์ชันสมัครสมาชิกอันเดิมของหน้าเว็บมาเสริมพลังยิงเข้าฐานข้อมูล
-  const originalRegisterOrLogin = window.handleRegisterOrLogin;
-  window.handleRegisterOrLogin = function(event) {
-    // ดึงค่าที่พิมพ์ในฟอร์มออกมาก่อน
-    const name = event.target.name.value.trim();
-    const phone = event.target.phone.value.trim();
-    
-    if (name && phone) {
-      // สั่งให้ส่งค่าไปเก็บบนคอลเลกชัน members บน Cloud Firestore หลังบ้าน
-      window.saveMemberToFirebase(name, phone);
-    }
-    
-    // เรียกใช้ฟังก์ชันเซฟระบบเดิมลงเครื่องตามปกติเพื่อไม่ให้หน้าเว็บรวน
-    if (typeof originalRegisterOrLogin === "function") {
-      originalRegisterOrLogin(event);
-    }
-  };
-</script>
+    // 2. ระบบบวกแต้มจำนวนขวดและบันทึกประวัติธุรกรรมซื้อน้ำลงหลังบ้าน Firebase อัตโนมัติเมื่อชำระเงินสำเร็จ
+    window.syncTransactionToFirebase = async function(transactionData, userState) {
+      try {
+        // บันทึกประวัติการขายลงคอลเลกชัน "transactions"
+        await addDoc(collection(db, "transactions"), {
+          orderId: transactionData.id,
+          tierName: transactionData.tier,
+          amountPaid: transactionData.price,
+          phone: userState ? userState.phone : "Guest (ไม่ได้เข้าสู่ระบบ)",
+          timestamp: new Date().toISOString()
+        });
+        console.log("ซิงค์ประวัติการขายลง Firebase สำเร็จ!");
+
+        // อัปเดตยอดการซื้อสะสมของสมาชิกเข้าไปใน Cloud Firestore
+        if (userState && userState.phone) {
+          const q = query(collection(db, "members"), where("phone", "==", userState.phone));
+          const querySnapshot = await getDocs(q);
+          querySnapshot.forEach(async (document) => {
+            const memberRef = doc(db, "members", document.id);
+            await updateDoc(memberRef, {
+              bottlesBought: userState.bottlesBought,
+              hasDiscount: userState.hasDiscount
+            });
+            console.log("อัปเดตแต้มสมาชิกขวดน้ำบน Firebase สำเร็จ!");
+          });
+        }
+      } catch (error) {
+        console.error("เกิดข้อผิดพลาดในการซิงค์ข้อมูลธุรกรรม: ", error);
+      }
+    };
+
+    const originalRegisterOrLogin = window.handleRegisterOrLogin;
+    window.handleRegisterOrLogin = function(event) {
+      const name = event.target.name.value.trim();
+      const phone = event.target.phone.value.trim();
+      
+      if (name && phone) {
+        window.saveMemberToFirebase(name, phone);
+      }
+      
+      if (typeof originalRegisterOrLogin === "function") {
+        originalRegisterOrLogin(event);
+      }
+    };
+  </script>
+</body>
+</html>
