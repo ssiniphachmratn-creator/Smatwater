@@ -558,23 +558,58 @@
   // 1. ดึงฟังก์ชันเชื่อมต่อจากตัวระบบออนไลน์ของ Firebase
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   
-  // 2. ดึงฐานข้อมูล Firestore มาเตรียมใช้งาน (สำหรับเก็บค่าปริมาณน้ำหรือสถิติต่างๆ)
-  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  // 2. ดึงฐานข้อมูล Firestore มาเตรียมใช้งาน (เพิ่ม collection และ addDoc สำหรับส่งค่า)
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  // 3. วางโค้ดที่คุณเพิ่งได้มาจากหน้าจอ Firebase (เอามาวางแทนที่ตรงนี้ทั้งหมดเลยครับ)
+  // 3. วางโค้ดที่คุณเพิ่งได้มาจากหน้าจอ Firebase
   const firebaseConfig = {
-  apiKey: "AIzaSyA9hWjeFmorWdQn5dGu1ut0BMlvaOLK-zY",
-  authDomain: "smartwater1-5e117.firebaseapp.com",
-  projectId: "smartwater1-5e117",
-  storageBucket: "smartwater1-5e117.firebasestorage.app",
-  messagingSenderId: "660889405048",
-  appId: "1:660889405048:web:db72a16ca75577c8184f8d",
-  measurementId: "G-EQMM2X3KSC"
-};
+    apiKey: "AIzaSyA9hWjeFmorWdQn5dGu1ut0BMlvaOLK-zY",
+    authDomain: "smartwater1-5e117.firebaseapp.com",
+    projectId: "smartwater1-5e117",
+    storageBucket: "smartwater1-5e117.firebasestorage.app",
+    messagingSenderId: "660889405048",
+    appId: "1:660889405048:web:db72a16ca75577c8184f8d",
+    measurementId: "G-EQMM2X3KSC"
+  };
+
   // 4. สั่งให้ระบบเริ่มเชื่อมต่อ
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
   console.log("Firebase พร้อมทำงานร่วมกับสมาร์ทวอเตอร์แล้ว!");
-</script></body>
-</html>
+
+  // 5. เชื่อมต่อเข้ากับปุ่มและระบบสมัครสมาชิกของหน้าเว็บเดิมอัตโนมัติ
+  // สร้างฟังก์ชันบันทึกข้อมูลเพื่อดึงไปใช้กับฟังก์ชันจัดเก็บหลักด้านบน
+  window.saveMemberToFirebase = async function(name, phone) {
+    try {
+      const docRef = await addDoc(collection(db, "members"), {
+        name: name,
+        phone: phone,
+        bottlesBought: 0,
+        hasDiscount: false,
+        createdAt: new Date().toISOString()
+      });
+      console.log("บันทึกข้อมูลสมาชิกไปยัง Firebase สำเร็จ! ID:", docRef.id);
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาดในการบันทึกข้อมูลไป Firebase: ", error);
+    }
+  };
+
+  // ดึงฟังก์ชันสมัครสมาชิกอันเดิมของหน้าเว็บมาเสริมพลังยิงเข้าฐานข้อมูล
+  const originalRegisterOrLogin = window.handleRegisterOrLogin;
+  window.handleRegisterOrLogin = function(event) {
+    // ดึงค่าที่พิมพ์ในฟอร์มออกมาก่อน
+    const name = event.target.name.value.trim();
+    const phone = event.target.phone.value.trim();
+    
+    if (name && phone) {
+      // สั่งให้ส่งค่าไปเก็บบนคอลเลกชัน members บน Cloud Firestore หลังบ้าน
+      window.saveMemberToFirebase(name, phone);
+    }
+    
+    // เรียกใช้ฟังก์ชันเซฟระบบเดิมลงเครื่องตามปกติเพื่อไม่ให้หน้าเว็บรวน
+    if (typeof originalRegisterOrLogin === "function") {
+      originalRegisterOrLogin(event);
+    }
+  };
+</script>
