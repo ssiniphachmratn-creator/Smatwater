@@ -74,7 +74,9 @@ function submitRegister() {
         registeredAt: serverTimestamp(),
         stampCount: 0
     }).then(() => {
+        // ข้อความเหลือแค่คำนี้ตามที่แกต้องการครับ
         alert("บันทึกเข้าสู่ระบบเรียบร้อยแล้ว");
+        
         nameInput.value = "";
         phoneInput.value = "";
         changePage("registerPage", "step1");
