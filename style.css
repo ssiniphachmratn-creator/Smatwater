@@ -1,238 +1,175 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
+
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #eef2f7;
+    font-family: 'Kanit', sans-serif;
+    background-color: #f4f7fa;
+    margin: 0;
+    padding: 0;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    margin: 0;
-    padding: 20px 0;
-}
-
-/* โครงตู้จำลองสไตล์ Mobile App */
-.app-container {
-    background: #ffffff;
-    width: 390px;
-    border-radius: 24px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-    overflow: hidden;
-    box-sizing: border-box;
-}
-
-.step-page { display: none; }
-.active { display: block; }
-
-/* Header บาร์สีน้ำเงิน */
-.header-bar {
-    background-color: #2563eb;
-    color: white;
-    padding: 16px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    display: flex;
     align-items: center;
+    min-height: 100vh;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 430px; /* ขนาดกว้างพอดีมือถือสเปกไอโฟน */
+    height: 100vh;
+    background: #ffffff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    overflow-y: auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header สุดหรู */
+.header-bar {
+    background: linear-gradient(135deg, #2f80ed, #00d2ff);
+    color: white;
+    padding: 20px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 500;
+    border-radius: 0 0 24px 24px;
+    box-shadow: 0 4px 12px rgba(47, 128, 237, 0.2);
 }
 
 .content-body {
-    padding: 16px;
+    padding: 20px;
+    flex: 1;
 }
 
-/* Banner สมัครสมาชิก */
+/* Banner สมัครสมาชิกแบบ Soft Premium */
 .member-banner {
-    background: linear-gradient(135deg, #4f46e5, #3b82f6);
-    color: white;
-    padding: 14px 18px;
+    background: linear-gradient(135deg, #e0f2fe, #bae6fd);
     border-radius: 16px;
+    padding: 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    cursor: pointer;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(14, 165, 233, 0.1);
 }
-.banner-text strong { font-size: 0.95rem; display: block; margin-bottom: 2px;}
-.banner-text p { margin: 0; font-size: 0.8rem; opacity: 0.9; }
-.banner-arrow { font-size: 1.2rem; }
+.member-banner:active { transform: scale(0.98); }
+.banner-text strong { color: #0369a1; font-size: 15px; }
+.banner-text p { margin: 4px 0 0 0; color: #0c4a6e; font-size: 12px; }
+.banner-arrow { color: #0369a1; font-weight: bold; }
 
-/* โลโก้ตรงกลาง */
+/* Logo Section */
 .logo-section {
     text-align: center;
-    background: #ffffff;
-    border: 1px solid #f1f5f9;
-    padding: 20px;
-    border-radius: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-    margin-bottom: 20px;
+    margin-bottom: 28px;
 }
 .logo-circle {
     width: 90px;
     height: 90px;
-    background-color: #eff6ff;
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
     border-radius: 50%;
-    margin: 0 auto 10px;
     display: flex;
     justify-content: center;
     align-items: center;
+    margin: 0 auto 12px auto;
+    font-size: 40px;
+    box-shadow: 0 8px 20px rgba(220, 252, 231, 0.5);
 }
-.inner-gear { font-size: 2.5rem; color: #2563eb; }
-
 .badge-online {
     background-color: #22c55e;
     color: white;
-    font-size: 0.7rem;
-    font-weight: bold;
-    padding: 3px 10px;
+    padding: 4px 12px;
     border-radius: 20px;
-    display: inline-block;
-    margin-bottom: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
-.logo-section h3 { margin: 5px 0; color: #1e293b; font-size: 1.2rem; }
-.subtitle { margin: 0; font-size: 0.75rem; color: #94a3b8; }
+.logo-section h3 { margin: 12px 0 6px 0; font-size: 20px; color: #1e293b; }
+.subtitle { font-size: 13px; color: #64748b; margin: 0; padding: 0 10px; }
 
-.section-title {
-    color: #475569;
-    margin: 15px 0 10px 5px;
-    font-size: 0.95rem;
-}
+.section-title { font-size: 15px; color: #334155; margin-bottom: 12px; font-weight: 500; }
 
-/* การ์ดเลือกน้ำดื่ม */
+/* การ์ดเลือกน้ำแบบมีมิติ มินิมอล */
 .water-card {
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 16px;
-    padding: 14px;
+    padding: 16px;
     display: flex;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
+    transition: all 0.2s ease;
     cursor: pointer;
-    transition: all 0.2s;
 }
-.water-card:hover {
-    border-color: #3b82f6;
+.water-card:active {
+    transform: scale(0.97);
     background-color: #f8fafc;
-    transform: translateY(-1px);
+    border-color: #cbd5e1;
 }
 .volume-badge {
-    width: 45px;
-    height: 45px;
-    border-radius: 10px;
+    width: 55px;
+    height: 55px;
+    border-radius: 12px;
+    background: #eff6ff;
+    color: #2563eb;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-weight: bold;
-    font-size: 0.9rem;
+    font-weight: 600;
+    font-size: 14px;
 }
-.badge-1l { background-color: #eff6ff; color: #2563eb; }
-.badge-2l { background-color: #f0fdf4; color: #16a34a; }
+.card-details { flex: 1; padding: 0 14px; }
+.water-title { display: block; font-size: 15px; font-weight: 500; color: #1e293b; }
+.water-desc { font-size: 12px; color: #64748b; }
+.price-tag { font-size: 18px; font-weight: 600; color: #2563eb; }
 
-.card-details {
-    flex-grow: 1;
-    padding: 0 14px;
-    text-align: left;
+/* หน้าสั่งงานและนับเวลาถอยหลังแบบแอปยุคใหม่ */
+.step-page { display: none; width: 100%; height: 100%; box-sizing: border-box; }
+.step-page.active { display: block; }
+.text-center { text-align: center; }
+
+.payment-page, .working-page { padding-top: 40px; }
+.payment-icon { font-size: 70px; margin-bottom: 15px; }
+.price-display {
+    background: #f1f5f9;
+    padding: 12px 24px;
+    border-radius: 30px;
+    display: inline-block;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 20px 0;
 }
-.water-title { font-weight: bold; color: #1e293b; display: block; font-size: 0.95rem; }
-.water-desc { color: #94a3b8; font-size: 0.75rem; }
 
-.price-tag {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #2563eb;
-}
-
-/* หน้ากากและปุ่มอื่นๆ */
-button {
-    padding: 14px;
-    border: none;
-    border-radius: 12px;
-    font-size: 1rem;
-    font-weight: bold;
-    cursor: pointer;
-    width: 100%;
-}
-.btn-primary { background-color: #2563eb; color: white; }
-.btn-danger { background-color: #ef4444; color: white; }
-
-.qr-placeholder {
-    width: 200px;
-    height: 200px;
-    background-color: #f8fafc;
-    border: 2px dashed #cbd5e1;
-    margin: 20px auto;
+/* วงกลมจับเวลาแบบคลีนๆ */
+.timer-circle {
+    width: 140px;
+    height: 140px;
+    border: 6px solid #e2e8f0;
+    border-top-color: #2563eb;
+    border-radius: 50%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    font-size: 0.85rem;
-    color: #64748b;
+    margin: 40px auto;
+    background: #fff;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.04);
 }
+#countdown-timer { font-size: 42px; font-weight: 600; color: #1e293b; line-height: 1; }
+.timer-circle p { margin: 4px 0 0 0; font-size: 12px; color: #64748b; }
 
-.status-box {
-    font-size: 1.2rem;
-    padding: 16px;
-    border-radius: 12px;
-    font-weight: bold;
-}
-.status-working { background-color: #dcfce7; color: #15803d; }
-.status-paused { background-color: #fef3c7; color: #b45309; }
-.status-off { background-color: #fee2e2; color: #b91c1c; }
-
-.timer-countdown {
-    font-size: 4rem;
-    color: #ef4444;
-    font-weight: bold;
-    margin: 25px 0;
-    display: none;
-}
-
-.footer-setting {
-    text-align: center;
-    font-size: 0.75rem;
-    color: #94a3b8;
-    margin-top: 25px;
-    cursor: pointer;
-}
-/* สไตล์สำหรับ หน้าต่าง Popup สมัครสมาชิก */
-.modal {
-    display: none; 
-    position: fixed; 
-    z-index: 999; 
-    left: 0;
-    top: 0;
-    width: 100%; 
-    height: 100%; 
-    background-color: rgba(0,0,0,0.5); 
-    align-items: center;
-    justify-content: center;
-}
-.modal-content {
-    background-color: #fff;
-    padding: 25px;
-    border-radius: 15px;
-    width: 85%;
-    max-width: 400px;
-    text-align: center;
-    position: relative;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    color: #333;
-}
-.close-btn {
-    position: absolute;
-    right: 15px;
-    top: 10px;
-    font-size: 28px;
-    cursor: pointer;
-    color: #aaa;
-}
-.close-btn:hover { color: #000; }
-.btn-submit {
-    background-color: #007bff;
-    color: white;
+/* ปุ่มต่างๆ ทรงมนทันสมัย */
+button { font-family: 'Kanit', sans-serif; }
+.btn-stop, .btn-submit, .btn-demo {
     border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
+    padding: 14px 24px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 500;
     cursor: pointer;
     width: 100%;
-    font-size: 16px;
-    font-weight: bold;
-    margin-top: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
 }
-.btn-submit:hover { background-color: #0056b3; }
+.btn-stop:active, .btn-submit:active { transform: scale(0.98); }
+.btn-demo { background-color: #f1f5f9; color: #64748b; margin-top: 40px; font-size: 13px; }
