@@ -29,10 +29,12 @@ async function addStamp() {
 async function getFinalPrice(amount) {
     if (!currentUserPhone) return amount;
     const userDoc = await getDoc(doc(db, "members", currentUserPhone));
-    if (userDoc.exists() && userDoc.data().stampCount >= 3) {
-        alert("🌟 ใช้สิทธิ์ส่วนลดสะสมแต้ม 5 บาท!");
+    
+    // เงื่อนไข: ครบ 5 ครั้ง ลด 2 บาท
+    if (userDoc.exists() && userDoc.data().stampCount >= 5) {
+        alert("🌟 ใช้สิทธิ์ส่วนลดสะสมแต้ม 2 บาท!");
         await updateDoc(doc(db, "members", currentUserPhone), { stampCount: 0 });
-        return amount - 5;
+        return Math.max(0, amount - 2);
     }
     return amount;
 }
@@ -93,7 +95,6 @@ function startDispensing() {
     document.getElementById("btn-main-action").innerText = "🛑 กดหยุดจ่ายน้ำชั่วคราว";
 }
 
-// จบการจ่ายน้ำ ให้เพิ่มแต้ม
 function completeTransaction() {
     addStamp();
     changePage("step3", "step1");
@@ -108,10 +109,9 @@ function changePage(hideId, showId) {
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btn-water-5")?.addEventListener("click", () => selectAmount(5));
     document.getElementById("btn-water-10")?.addEventListener("click", () => selectAmount(10));
-    document.getElementById("btn-simulate-esp")?.addEventListener("click", () => () => updateDoc(doc(db, "machine_control", "status_doc"), { status: "paid" }));
+    document.getElementById("btn-simulate-esp")?.addEventListener("click", () => updateDoc(doc(db, "machine_control", "status_doc"), { status: "paid" }));
     document.getElementById("btn-submit-register")?.addEventListener("click", submitRegister);
     document.getElementById("btn-goto-register")?.addEventListener("click", () => changePage("step1", "registerPage"));
     document.getElementById("btn-cancel-register")?.addEventListener("click", () => changePage("registerPage", "step1"));
-    // เพิ่มปุ่มจบรายการ (ที่หน้า Step 3 ให้กดเพื่อกลับหน้าแรกและเพิ่มแต้ม)
     document.getElementById("btn-main-action")?.addEventListener("click", completeTransaction);
 });
