@@ -10,40 +10,50 @@ function selectAmount(amount) {
 
 // ฟังก์ชันเมื่อบอร์ด ESP ส่งสัญญาณกลับมาว่า "ได้รับเงินเรียบร้อยแล้ว"
 function simulateEspSignal() {
-    changePage("step2", "step3");
-    startDispensing(); // เริ่มต้นด้วยการจ่ายน้ำทันที
+    // 1. เปลี่ยนไปหน้า "ชำระเงินสำเร็จ" โชว์ติ๊กถูกเขียวๆ ก่อน
+    changePage("step2", "stepSuccess");
+    
+    // 2. หน่วงเวลาไว้ 2 วินาทีให้ดูพรีเมียม แล้วค่อยเด้งเข้าหน้าสเต็ปจ่ายน้ำ
+    setTimeout(function() {
+        changePage("stepSuccess", "step3");
+        startDispensing(); // เริ่มต้นปล่อยน้ำทันที
+    }, 2000);
 }
 
-// ฟังก์ชันสั่งให้ "จ่ายน้ำ" (น้ำไหล)
+// ฟังก์ชันสั่งให้ "จ่ายน้ำ" (โหมดปกติ น้ำไหล)
 function startDispensing() {
     isDispensing = true;
-    clearInterval(countdownInterval); // ถ้ากำลังจ่ายน้ำ ให้หยุดนับเวลาถอยหลัง 30 วิ
+    clearInterval(countdownInterval); // สั่งหยุดนับถอยหลัง 30 วิ ทันทีเพราะน้ำกำลังไหล
     
-    // อัปเดตหน้าจอแสดงผล
+    // อัปเดต UI หน้าจอให้เข้าสู่โหมดจ่ายน้ำ
     document.getElementById("countdown-timer").innerText = "💧";
-    document.querySelector("#step3 h2").innerText = "กำลังจ่ายน้ำ...";
+    document.getElementById("timer-unit").innerText = "กำลังจ่ายน้ำ...";
+    document.getElementById("working-status-title").innerText = "กำลังจ่ายน้ำ...";
+    document.querySelector(".water-drop-animation").style.animation = "pulse 1.5s infinite";
     
-    // เปลี่ยนปุ่มให้แสดงคำว่า "🛑 กดหยุดจ่ายน้ำชั่วคราว"
+    // รีเซ็ตสไตล์ปุ่มเป็น "🛑 กดหยุดจ่ายน้ำชั่วคราว"
     let actionBtn = document.querySelector(".btn-stop");
     actionBtn.innerText = "🛑 กดหยุดจ่ายน้ำชั่วคราว";
     actionBtn.setAttribute("onclick", "pauseDispenser()");
-    actionBtn.style.backgroundColor = "#dc3545"; // สีแดง
+    actionBtn.style.backgroundColor = "#dc3545"; // สีแดงปุ่มหยุดชั่วคราว
     actionBtn.style.color = "white";
 }
 
-// ฟังก์ชันสั่งให้ "หยุดจ่ายน้ำชั่วคราว" (น้ำหยุด และเริ่มนับถอยหลัง 30 วิ)
+// ฟังก์ชันสั่งให้ "หยุดจ่ายน้ำชั่วคราว" (น้ำหยุด และเริ่มจับเวลา 30 วิ ทันที!)
 function pauseDispenser() {
     isDispensing = false;
-    document.querySelector("#step3 h2").innerText = "หยุดจ่ายน้ำชั่วคราว";
+    document.getElementById("working-status-title").innerText = "หยุดจ่ายน้ำชั่วคราว";
+    document.getElementById("timer-unit").innerText = "วินาทีก่อนระบบตัด";
+    document.querySelector(".water-drop-animation").style.animation = "none"; // หยุดอนิเมชันหยดน้ำสั่น
     
-    // เปลี่ยนปุ่มให้แสดงคำว่า "▶️ กดจ่ายน้ำต่อ"
+    // เปลี่ยนปุ่มเป็น "▶️ กดจ่ายน้ำต่อ" เพื่อให้สลับกดใช้งานได้
     let actionBtn = document.querySelector(".btn-stop");
     actionBtn.innerText = "▶️ กดจ่ายน้ำต่อ";
     actionBtn.setAttribute("onclick", "startDispensing()");
-    actionBtn.style.backgroundColor = "#22c55e"; // สีเขียว
+    actionBtn.style.backgroundColor = "#22c55e"; // เปลี่ยนเป็นสีเขียว
     actionBtn.style.color = "white";
     
-    // เริ่มจับเวลาถอยหลัง 30 วินาทีทันที!
+    // โหลดตัวจับเวลานับถอยหลัง 30 วินาทีตามใจสั่ง!
     timeLeft = 30;
     document.getElementById("countdown-timer").innerText = timeLeft;
     
@@ -51,7 +61,7 @@ function pauseDispenser() {
         timeLeft--;
         document.getElementById("countdown-timer").innerText = timeLeft;
         
-        // หากหยุดน้ำค้างไว้นานจนครบ 30 วินาที ระบบจะตัดการทำงานทันที
+        // หากครบ 30 วินาทีแล้วไม่มีการกดจ่ายน้ำต่อ ระบบจะตัดและเด้งกลับหน้าแรกอัตโนมัติ
         if (timeLeft <= 0) {
             clearInterval(countdownInterval);
             alert("คุณหยุดน้ำค้างไว้นานเกิน 30 วินาที ระบบตัดการทำงานอัตโนมัติครับ");
@@ -60,18 +70,20 @@ function pauseDispenser() {
     }, 1000);
 }
 
-// ฟังก์ชันช่วยเปลี่ยนหน้าจอ
+// ฟังก์ชันช่วยเปลี่ยนหน้าจอแสดงผล
 function changePage(hideId, showId) {
     document.getElementById(hideId).classList.remove("active");
     document.getElementById(showId).classList.add("active");
 }
 
-// ฟังก์ชันรีเซ็ตระบบกลับไปหน้าแรกสุด
+// ฟังก์ชันรีเซ็ตระบบทั้งหมดกลับไปหน้าแรกสุด (หน้าหลัก)
 function resetToHome() {
     clearInterval(countdownInterval);
     isDispensing = false;
     changePage("step3", "step1");
     changePage("step2", "step1");
+    changePage("stepSuccess", "step1");
+    changePage("registerPage", "step1");
 }
 
 // ==========================================
