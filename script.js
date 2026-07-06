@@ -1,9 +1,8 @@
 // ==========================================
 // 1. ส่วนตั้งค่า FIREBASE (Config)
-// ** แกอย่าลืมเอาค่าจาก Firebase Console ของแกมาเปลี่ยนตรงนี้นะครับ **
 // ==========================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "YOUR_API_KEY",
@@ -19,77 +18,68 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// ==========================================
-// 2. ตัวแปรสำหรับระบบควบคุม
-// ==========================================
+// ตัวแปรระบบควบคุม
 let countdownInterval;  
 let timeLeft = 30;      
 let isDispensing = false; 
 
-// ดึง Elements มารอไว้ใช้งาน (แก้ปัญหา Scope จากการใช้ Type="module")
-window.selectAmount = selectAmount;
-window.simulateEspSignal = simulateEspSignal;
-window.pauseDispenser = pauseDispenser;
-window.startDispensing = startDispensing;
-window.openRegisterModal = openRegisterModal;
-window.closeRegisterPage = closeRegisterPage;
-window.submitRegister = submitRegister;
-
 // ดักฟังสถานะจาก Firebase Realtime (คุยกับ ESP32)
-// โครงสร้าง Database ที่ใช้อ้างอิง: /dispenser/status และ /dispenser/price
 onValue(ref(db, 'dispenser'), (snapshot) => {
     const data = snapshot.val();
     if (!data) return;
 
-    // ถ้าระบบอยู่ในหน้าชำระเงิน (step2) แล้วสถานะใน Firebase เปลี่ยนเป็น "paid" (จ่ายเงินแล้ว)
+    // ถ้าระบบอยู่ในหน้าชำระเงิน (step2) แล้วสถานะใน Firebase เปลี่ยนเป็น "paid"
     if (document.getElementById("step2").classList.contains("active") && data.status === "paid") {
         triggerPaymentSuccess();
     }
 });
 
 // ==========================================
-// 3. ฟังก์ชันการทำงานหลัก (Logic)
+// 2. ฟังก์ชันการทำงานหลัก (Logic)
 // ==========================================
 
-// ฟังก์ชันเมื่อกดเลือกรายการน้ำดื่ม (5 หรือ 10 บาท)
+// ฟังก์ชันเมื่อกดเลือกรายการน้ำดื่ม
 function selectAmount(amount) {
     document.getElementById("selected-price").innerText = amount;
     
-    // อัปเดตข้อมูลลง Firebase เพื่อบอกให้ ESP32 รู้ว่าลูกค้าเลือกราคานี้ และเปลี่ยนสถานะเป็นรอจ่ายเงิน (pending)
     update(ref(db, 'dispenser'), {
         status: "pending",
         price: amount
     }).then(() => {
         changePage("step1", "step2");
+    }).catch((error) => {
+        console.error("Firebase Update Error:", error);
+        // ถึงแม้ยังไม่ได้ต่อ Firebase หรือ Config ไม่ถูก ก็ให้เปลี่ยนหน้าเดโมไปก่อนเพื่อทดสอบ UI
+        changePage("step1", "step2");
     });
 }
 
-// ฟังก์ชันจำลอง (สำหรับกดทดสอบบนมือถือตอนบอร์ดจริงยังไม่ส่งค่ามา)
+// ฟังก์ชันจำลองเมื่อบอร์ด ESP ส่งสัญญาณกลับมาว่าจ่ายเงินสำเร็จ
 function simulateEspSignal() {
-    // จำลองสั่งอัปเดตลงฐานข้อมูลว่าจ่ายเงินสำเร็จแล้ว
     update(ref(db, 'dispenser'), {
         status: "paid"
+    }).catch(() => {
+        // หาก Firebase Config ยังไม่ถูกต้อง ให้ทำงานแบบออฟไลน์เดโมไปก่อน
+        triggerPaymentSuccess();
     });
 }
 
-// ฟังก์ชันเมื่อชำระเงินสำเร็จ (ทำงานเมื่อได้รับสถานะ paid จาก Firebase)
+// ฟังก์ชันเมื่อชำระเงินสำเร็จ
 function triggerPaymentSuccess() {
     changePage("step2", "stepSuccess");
     
     setTimeout(function() {
         changePage("stepSuccess", "step3");
-        // อัปเดตสถานะในคลาวด์ว่าตู้กำลังจ่ายน้ำ (dispensing)
         update(ref(db, 'dispenser'), { status: "dispensing" });
         startDispensing(); 
     }, 2000);
 }
 
-// ฟังก์ชันสั่งให้ "จ่ายน้ำ" (โหมดปกติ น้ำไหล)
+// ฟังก์ชันสั่งให้ "จ่ายน้ำ" (น้ำไหล)
 function startDispensing() {
     isDispensing = true;
     clearInterval(countdownInterval); 
     
-    // อัปเดตสเตตัสใน Firebase บอกบอร์ด ESP ให้เปิดวาล์วน้ำไหลต่อ
     update(ref(db, 'dispenser'), { status: "dispensing" });
 
     document.getElementById("countdown-timer").innerText = "💧";
@@ -97,29 +87,30 @@ function startDispensing() {
     document.getElementById("working-status-title").innerText = "กำลังจ่ายน้ำ...";
     document.querySelector(".water-drop-animation").style.animation = "pulse 1.5s infinite";
     
-    let actionBtn = document.querySelector(".btn-stop");
-    actionBtn.innerText = "🛑 กดหยุดจ่ายน้ำชั่วคราว";
-    actionBtn.setAttribute("onclick", "pauseDispenser()");
-    actionBtn.style.backgroundColor = "#dc3545"; 
-    actionBtn.style.color = "white";
+    let actionBtn = document.getElementById("btn-main-action");
+    if (actionBtn) {
+        actionBtn.innerText = "🛑 กดหยุดจ่ายน้ำชั่วคราว";
+        actionBtn.style.backgroundColor = "#dc3545"; 
+        actionBtn.style.color = "white";
+    }
 }
 
-// ฟังก์ชันสั่งให้ "หยุดจ่ายน้ำชั่วคราว" (น้ำหยุด และเริ่มนับถอยหลัง 30 วิ)
+// ฟังก์ชันสั่งให้ "หยุดจ่ายน้ำชั่วคราว"
 function pauseDispenser() {
     isDispensing = false;
     
-    // อัปเดตสเตตัสใน Firebase บอกบอร์ด ESP ให้สั่งปิดวาล์วน้ำหยุดชั่วคราว (paused)
     update(ref(db, 'dispenser'), { status: "paused" });
 
     document.getElementById("working-status-title").innerText = "หยุดจ่ายน้ำชั่วคราว";
     document.getElementById("timer-unit").innerText = "วินาทีก่อนระบบตัด";
     document.querySelector(".water-drop-animation").style.animation = "none"; 
     
-    let actionBtn = document.querySelector(".btn-stop");
-    actionBtn.innerText = "▶️ กดจ่ายน้ำต่อ";
-    actionBtn.setAttribute("onclick", "startDispensing()");
-    actionBtn.style.backgroundColor = "#22c55e"; 
-    actionBtn.style.color = "white";
+    let actionBtn = document.getElementById("btn-main-action");
+    if (actionBtn) {
+        actionBtn.innerText = "▶️ กดจ่ายน้ำต่อ";
+        actionBtn.style.backgroundColor = "#22c55e"; 
+        actionBtn.style.color = "white";
+    }
     
     timeLeft = 30;
     document.getElementById("countdown-timer").innerText = timeLeft;
@@ -131,18 +122,35 @@ function pauseDispenser() {
         if (timeLeft <= 0) {
             clearInterval(countdownInterval);
             alert("คุณหยุดน้ำค้างไว้นานเกิน 30 วินาที ระบบตัดการทำงานอัตโนมัติครับ");
-            // สั่ง Firebase อัปเดตสถานะเป็นสิ้นสุดเซสชัน (completed) เพื่อให้บอร์ด ESP เคลียร์สถานะปิดวาล์วถาวร
             update(ref(db, 'dispenser'), { status: "completed" });
             resetToHome();
         }
     }, 1000);
 }
 
+// ฟังก์ชันเปิดหน้าสมัครสมาชิก
+function openRegisterModal() { 
+    changePage("step1", "registerPage"); 
+}
+
+// ฟังก์ชันปิดหน้าสมัครสมาชิก
+function closeRegisterPage() { 
+    changePage("registerPage", "step1"); 
+}
+
+// ฟังก์ชันยืนยันการสมัครสมาชิก
+function submitRegister() {
+    alert("สมัครสมาชิกสำเร็จ! ระบบได้บันทึกข้อมูลเรียบร้อยแล้วครับ");
+    changePage("registerPage", "step1");
+}
+
+// ฟังก์ชันช่วยเปลี่ยนหน้าจอ
 function changePage(hideId, showId) {
     document.getElementById(hideId).classList.remove("active");
     document.getElementById(showId).classList.add("active");
 }
 
+// ฟังก์ชันรีเซ็ตระบบกลับหน้าแรก
 function resetToHome() {
     clearInterval(countdownInterval);
     isDispensing = false;
@@ -153,27 +161,26 @@ function resetToHome() {
 }
 
 // ==========================================
-// 4. ฟังก์ชันจัดการหน้าสมัครสมาชิก
-// ==========================================
-function openRegisterModal() { changePage("step1", "registerPage"); }
-function closeRegisterPage() { changePage("registerPage", "step1"); }
-function submitRegister() {
-    alert("สมัครสมาชิกสำเร็จ! ระบบได้บันทึกข้อมูลเรียบร้อยแล้วครับ");
-    changePage("registerPage", "step1");
-}
-// ==========================================
-// 5. ผูกปุ่มจากหน้าเว็บ (DOM Event Listeners) 
-// เพื่อแก้ปัญหาเวลากดเลือกน้ำและสมัครสมาชิกไม่ได้เมื่อใช้ Module
+// 3. ผูกปุ่มการทำงานเมื่อโหลดหน้าจอเสร็จ (Event Listeners)
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
-    // ปุ่มเลือกน้ำ 5 บาท และ 10 บาท
+    // เลือกรายการน้ำดื่ม
     document.getElementById("btn-water-5")?.addEventListener("click", () => selectAmount(5));
     document.getElementById("btn-water-10")?.addEventListener("click", () => selectAmount(10));
     
-    // ปุ่มจำลองเงินเข้าสำหรับเดโม
+    // จำลองสัญญาณเงินเข้า
     document.getElementById("btn-simulate-esp")?.addEventListener("click", () => simulateEspSignal());
 
-    // ปุ่มเปิด-ปิด หน้าสมัครสมาชิก
+    // ปุ่มหยุดชั่วคราว / จ่ายน้ำต่อ (สลับสถานะตามตัวแปร isDispensing)
+    document.getElementById("btn-main-action")?.addEventListener("click", () => {
+        if (isDispensing) {
+            pauseDispenser();
+        } else {
+            startDispensing();
+        }
+    });
+
+    // สมัครสมาชิก
     document.getElementById("btn-goto-register")?.addEventListener("click", () => openRegisterModal());
     document.getElementById("btn-cancel-register")?.addEventListener("click", () => closeRegisterPage());
     document.getElementById("btn-submit-register")?.addEventListener("click", () => submitRegister());
