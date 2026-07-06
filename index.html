@@ -1,5 +1,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="./style.css">
+<!-- ดึง script.js มาทำงานแบบ type="module" -->
 <script src="./script.js" type="module" defer></script>
 
 <div class="app-container">
@@ -12,7 +13,7 @@
         
         <div class="content-body">
             <!-- Banner สมัครสมาชิก -->
-            <div class="member-banner" onclick="openRegisterModal()" style="cursor: pointer;">
+            <div class="member-banner" id="btn-goto-register" style="cursor: pointer;">
                 <div class="banner-text">
                     <strong>🌟 สมัครสมาชิกเพื่อรับส่วนลด</strong>
                     <p>ซื้อครบทุก 3 ขวด รับส่วนลดฟรีทันที!</p>
@@ -33,7 +34,7 @@
             <!-- List รายการน้ำดื่ม -->
             <h4 class="section-title">เลือกรายการน้ำดื่ม</h4>
             
-            <div class="water-card" onclick="selectAmount(5)">
+            <div class="water-card" id="btn-water-5">
                 <div class="volume-badge">600mL</div>
                 <div class="card-details">
                     <span class="water-title">น้ำดื่มสะอาด (ขนาดทั่วไป)</span>
@@ -42,7 +43,7 @@
                 <div class="price-tag">5 ฿</div>
             </div>
 
-            <div class="water-card" onclick="selectAmount(10)">
+            <div class="water-card" id="btn-water-10">
                 <div class="volume-badge" style="background: #e0f2fe; color: #0369a1;">1L</div>
                 <div class="card-details">
                     <span class="water-title">น้ำดื่มสะอาด (ถังใหญ่)</span>
@@ -72,7 +73,7 @@
             </div>
             <p class="status-text">กำลังรอสัญญาณการชำระเงินจากตู้...</p>
             
-            <button class="btn-demo" onclick="simulateEspSignal()">[เดโม] จำลองว่าสแกนจ่ายเงินสำเร็จแล้ว</button>
+            <button class="btn-demo" id="btn-simulate-esp">[เดโม] จำลองว่าสแกนจ่ายเงินสำเร็จแล้ว</button>
         </div>
     </div>
 
@@ -105,7 +106,7 @@
                 <p id="timer-unit">สถานะปกติ</p>
             </div>
             
-            <button class="btn-stop" onclick="pauseDispenser()">🛑 กดหยุดจ่ายน้ำชั่วคราว</button>
+            <button class="btn-stop" id="btn-main-action">🛑 กดหยุดจ่ายน้ำชั่วคราว</button>
         </div>
     </div>
 
@@ -129,11 +130,11 @@
                 <input type="tel" placeholder="ตัวอย่าง: 0812345678" class="form-input" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box;">
             </div>
 
-            <button class="btn-submit-form" onclick="submitRegister()" style="background-color: #22c55e; color: white; border: none; padding: 14px; border-radius: 8px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 15px;">
+            <button class="btn-submit-form" id="btn-submit-register" style="background-color: #22c55e; color: white; border: none; padding: 14px; border-radius: 8px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 15px;">
                 ✅ ยืนยันการสมัครสมาชิก
             </button>
             
-            <button onclick="closeRegisterPage()" style="background-color: #dc3545; color: white; border: none; padding: 10px; border-radius: 8px; width: 100%; font-size: 14px; cursor: pointer;">
+            <button id="btn-cancel-register" style="background-color: #dc3545; color: white; border: none; padding: 10px; border-radius: 8px; width: 100%; font-size: 14px; cursor: pointer;">
                 ยกเลิกและกลับหน้าหลัก
             </button>
         </div>
