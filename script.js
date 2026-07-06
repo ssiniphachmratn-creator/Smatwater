@@ -59,14 +59,21 @@ function resetToHome() {
 }
 
 // ==========================================
-// ฟังก์ชันของ Popup สมัครสมาชิก (ส่วนเดิม)
+// ฟังก์ชันจัดการหน้าสมัครสมาชิกแบบเต็มหน้าจอ
+// ==========================================
+
+// ฟังก์ชันเปิดหน้าสมัครสมาชิก (สลับหน้า)
 function openRegisterModal() {
-    document.getElementById("registerModal").style.display = "flex";
+    changePage("step1", "registerPage");
 }
-function closeRegisterModal() {
-    document.getElementById("registerModal").style.display = "none";
+
+// ฟังก์ชันยกเลิกสมัครสมาชิก กลับหน้าแรก
+function closeRegisterPage() {
+    changePage("registerPage", "step1");
 }
+
+// ฟังก์ชันยืนยันการสมัครสมาชิก
 function submitRegister() {
-    alert("สมัครสมาชิกสำเร็จ! คุณได้รับส่วนลดเรียบร้อยแล้วครับ");
-    closeRegisterModal();
+    alert("สมัครสมาชิกสำเร็จ! ระบบได้บันทึกข้อมูลเรียบร้อยแล้วครับ");
+    changePage("registerPage", "step1"); // สลับกลับหน้าแรก
 }
