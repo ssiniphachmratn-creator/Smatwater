@@ -1,23 +1,21 @@
 // ==========================================
-// 1. ส่วนตั้งค่า FIREBASE (Config) แบบดั้งเดิม
+// 1. ส่วนตั้งค่า FIREBASE (Config) และเชื่อมต่อ FIRESTORE
 // ==========================================
 const firebaseConfig = {
     apiKey: "YOUR_API_KEY",
     authDomain: "YOUR_AUTH_DOMAIN",
-    databaseURL: "YOUR_DATABASE_URL",
     projectId: "YOUR_PROJECT_ID",
     storageBucket: "YOUR_STORAGE_BUCKET",
     messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
     appId: "YOUR_APP_ID"
 };
 
-// ตรวจสอบและเชื่อมต่อ Firebase
 let db = null;
 try {
     firebase.initializeApp(firebaseConfig);
-    db = firebase.database();
+    db = firebase.firestore(); // เปิดใช้งาน Cloud Firestore
 } catch (e) {
-    console.log("Firebase ยังไม่ได้ใส่คีย์ที่ถูกต้อง หรือทำงานโหมดออฟไลน์เดโม");
+    console.log("Firebase ยังไม่ได้ใส่คีย์ หรือรันโหมดออฟไลน์เดโม");
 }
 
 // ตัวแปรระบบควบคุม
@@ -25,15 +23,16 @@ let countdownInterval;
 let timeLeft = 30;      
 let isDispensing = false; 
 
-// ถ้าระบบผูกฐานข้อมูลสำเร็จ ให้รอรับสเตตัสจาก ESP32
+// ดักฟังสถานะจาก Cloud Firestore (ตรวจจับเมื่อ ESP32 อัปเดตการชำระเงิน)
 if (db) {
-    db.ref('dispenser').on('value', (snapshot) => {
-        const data = snapshot.val();
-        if (!data) return;
-
-        // ถ้าระบบอยู่ในหน้าชำระเงิน (step2) แล้วสถานะเปลี่ยนเป็น "paid"
-        if (document.getElementById("step2").classList.contains("active") && data.status === "paid") {
-            triggerPaymentSuccess();
+    db.collection('machine_control').doc('status_doc')
+    .onSnapshot((doc) => {
+        if (doc.exists) {
+            const data = doc.data();
+            // ถ้าระบบอยู่ในหน้าชำระเงิน (step2) แล้วสถานะใน Firestore เปลี่ยนเป็น "paid"
+            if (document.getElementById("step2").classList.contains("active") && data.status === "paid") {
+                triggerPaymentSuccess();
+            }
         }
     });
 }
@@ -47,25 +46,28 @@ function selectAmount(amount) {
     document.getElementById("selected-price").innerText = amount;
     
     if (db) {
-        db.ref('dispenser').update({
+        db.collection('machine_control').doc('status_doc').set({
             status: "pending",
-            price: amount
-        }).then(() => {
+            price: amount,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).then(() => {
             changePage("step1", "step2");
         }).catch(() => {
             changePage("step1", "step2");
         });
     } else {
-        changePage("step1", "step2"); // โหมดออฟไลน์เดโม
+        changePage("step1", "step2");
     }
 }
 
-// ฟังก์ชันจำลองเมื่อบอร์ด ESP ส่งสัญญาณกลับมาว่าจ่ายเงินสำเร็จ
+// ฟังก์ชันจำลองสัญญาณเงินเข้า (สำหรับกดทดสอบบนมือถือ)
 function simulateEspSignal() {
     if (db) {
-        db.ref('dispenser').update({ status: "paid" });
+        db.collection('machine_control').doc('status_doc').update({
+            status: "paid"
+        });
     } else {
-        triggerPaymentSuccess(); // โหมดออฟไลน์เดโม
+        triggerPaymentSuccess();
     }
 }
 
@@ -75,7 +77,9 @@ function triggerPaymentSuccess() {
     
     setTimeout(function() {
         changePage("stepSuccess", "step3");
-        if (db) db.ref('dispenser').update({ status: "dispensing" });
+        if (db) {
+            db.collection('machine_control').doc('status_doc').update({ status: "dispensing" });
+        }
         startDispensing(); 
     }, 2000);
 }
@@ -85,7 +89,9 @@ function startDispensing() {
     isDispensing = true;
     clearInterval(countdownInterval); 
     
-    if (db) db.ref('dispenser').update({ status: "dispensing" });
+    if (db) {
+        db.collection('machine_control').doc('status_doc').update({ status: "dispensing" });
+    }
 
     document.getElementById("countdown-timer").innerText = "💧";
     document.getElementById("timer-unit").innerText = "กำลังจ่ายน้ำ...";
@@ -104,7 +110,9 @@ function startDispensing() {
 function pauseDispenser() {
     isDispensing = false;
     
-    if (db) db.ref('dispenser').update({ status: "paused" });
+    if (db) {
+        db.collection('machine_control').doc('status_doc').update({ status: "paused" });
+    }
 
     document.getElementById("working-status-title").innerText = "หยุดจ่ายน้ำชั่วคราว";
     document.getElementById("timer-unit").innerText = "วินาทีก่อนระบบตัด";
@@ -127,29 +135,64 @@ function pauseDispenser() {
         if (timeLeft <= 0) {
             clearInterval(countdownInterval);
             alert("คุณหยุดน้ำค้างไว้นานเกิน 30 วินาที ระบบตัดการทำงานอัตโนมัติครับ");
-            if (db) db.ref('dispenser').update({ status: "completed" });
+            if (db) {
+                db.collection('machine_control').doc('status_doc').update({ status: "completed" });
+            }
             resetToHome();
         }
     }, 1000);
 }
 
-// ฟังก์ชันเปิดหน้าสมัครสมาชิก
-function openRegisterModal() { changePage("step1", "registerPage"); }
-// ฟังก์ชันปิดหน้าสมัครสมาชิก
-function closeRegisterPage() { changePage("registerPage", "step1"); }
-// ฟังก์ชันยืนยันการสมัครสมาชิก
+// ฟังก์ชันสมัครสมาชิกและบันทึกเข้าคอลเลกชัน "members" ยิงตรงเข้า Firestore
 function submitRegister() {
-    alert("สมัครสมาชิกสำเร็จ! ระบบได้บันทึกข้อมูลเรียบร้อยแล้วครับ");
-    changePage("registerPage", "step1");
+    const nameInput = document.querySelector("#registerPage input[type='text']");
+    const phoneInput = document.querySelector("#registerPage input[type='tel']");
+    
+    const fullName = nameInput ? nameInput.value.trim() : "";
+    const phoneNumber = phoneInput ? phoneInput.value.trim() : "";
+
+    if (fullName === "" || phoneNumber === "") {
+        alert("❌ กรุณากรอกข้อมูลให้ครบถ้วนทั้งชื่อและเบอร์โทรศัพท์ครับ");
+        return;
+    }
+
+    if (phoneNumber.length < 9 || isNaN(phoneNumber)) {
+        alert("❌ กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้องครับ");
+        return;
+    }
+
+    if (db) {
+        // บันทึกข้อมูลลงคอลเลกชัน 'members' โดยใช้เบอร์โทรเป็น ID ของเอกสาร
+        db.collection('members').doc(phoneNumber).set({
+            name: fullName,
+            phone: phoneNumber,
+            registeredAt: firebase.firestore.FieldValue.serverTimestamp(),
+            stampCount: 0
+        }).then(() => {
+            alert("🌟 สมัครสมาชิกสำเร็จ! ข้อมูลถูกบันทึกใน Firestore เรียบร้อยแล้วครับ");
+            if (nameInput) nameInput.value = "";
+            if (phoneInput) phoneInput.value = "";
+            changePage("registerPage", "step1");
+        }).catch((error) => {
+            console.error("Firestore Save Error:", error);
+            alert("❌ เกิดข้อผิดพลาด ไม่สามารถบันทึกข้อมูลได้ครับ");
+        });
+    } else {
+        alert("📱 [เดโม] สมัครสมาชิกสำเร็จ (โหมดจำลองออฟไลน์)");
+        if (nameInput) nameInput.value = "";
+        if (phoneInput) phoneInput.value = "";
+        changePage("registerPage", "step1");
+    }
 }
 
-// ฟังก์ชันช่วยเปลี่ยนหน้าจอ
+function openRegisterModal() { changePage("step1", "registerPage"); }
+function closeRegisterPage() { changePage("registerPage", "step1"); }
+
 function changePage(hideId, showId) {
     document.getElementById(hideId).classList.remove("active");
     document.getElementById(showId).classList.add("active");
 }
 
-// ฟังก์ชันรีเซ็ตระบบกลับหน้าแรก
 function resetToHome() {
     clearInterval(countdownInterval);
     isDispensing = false;
