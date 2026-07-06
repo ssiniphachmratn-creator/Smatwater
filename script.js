@@ -1,13 +1,17 @@
 // ==========================================
 // 1. ส่วนตั้งค่า FIREBASE (Config) และเชื่อมต่อ FIRESTORE
 // ==========================================
+// ==========================================
+// 1. ส่วนตั้งค่า FIREBASE (Config) และเชื่อมต่อ FIRESTORE
+// อัปเดตข้อมูลให้ตรงกับโปรเจกต์ smartwater1-5e117 แล้วครับ
+// ==========================================
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
+    apiKey: "AIzaSyAxXXXXXXXXXXXX_YOUR_ACTUAL_API_KEY", // แกเอาคีย์จริงจากหน้าตั้งค่ามาใส่ตรงนี้นะ
+    authDomain: "smartwater1-5e117.firebaseapp.com",
     projectId: "smartwater1-5e117",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    storageBucket: "smartwater1-5e117.appspot.com",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID", // เอาเลขจากหน้าคอนโซลมาใส่
+    appId: "YOUR_APP_ID"                           // เอา App ID จากหน้าคอนโซลมาใส่
 };
 
 let db = null;
