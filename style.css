@@ -13,7 +13,7 @@ body {
 
 .app-container {
     width: 100%;
-    max-width: 430px; /* ขนาดกว้างพอดีมือถือสเปกไอโฟน */
+    max-width: 430px;
     height: 100vh;
     background: #ffffff;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
@@ -23,82 +23,83 @@ body {
     flex-direction: column;
 }
 
-/* Header สุดหรู */
+/* Header UI 2026 */
 .header-bar {
-    background: linear-gradient(135deg, #2f80ed, #00d2ff);
+    background: linear-gradient(135deg, #2563eb, #38bdf8);
     color: white;
-    padding: 20px;
+    padding: 24px 20px;
     text-align: center;
     font-size: 18px;
     font-weight: 500;
     border-radius: 0 0 24px 24px;
-    box-shadow: 0 4px 12px rgba(47, 128, 237, 0.2);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
 }
 
 .content-body {
-    padding: 20px;
+    padding: 24px 20px;
     flex: 1;
 }
 
-/* Banner สมัครสมาชิกแบบ Soft Premium */
+/* Banner สมัครสมาชิก */
 .member-banner {
-    background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
     border-radius: 16px;
     padding: 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(14, 165, 233, 0.1);
+    transition: all 0.2s ease;
+    border: 1px solid rgba(37, 99, 235, 0.1);
 }
 .member-banner:active { transform: scale(0.98); }
-.banner-text strong { color: #0369a1; font-size: 15px; }
-.banner-text p { margin: 4px 0 0 0; color: #0c4a6e; font-size: 12px; }
-.banner-arrow { color: #0369a1; font-weight: bold; }
+.banner-text strong { color: #1e40af; font-size: 15px; }
+.banner-text p { margin: 4px 0 0 0; color: #1e3a8a; font-size: 12px; }
+.banner-arrow { color: #1e40af; font-weight: bold; }
 
 /* Logo Section */
 .logo-section {
     text-align: center;
-    margin-bottom: 28px;
+    margin-bottom: 30px;
 }
 .logo-circle {
     width: 90px;
     height: 90px;
-    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    background: linear-gradient(135deg, #f0fdf4, #bbf7d0);
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
     margin: 0 auto 12px auto;
     font-size: 40px;
-    box-shadow: 0 8px 20px rgba(220, 252, 231, 0.5);
+    box-shadow: 0 8px 20px rgba(187, 247, 208, 0.6);
 }
 .badge-online {
     background-color: #22c55e;
     color: white;
-    padding: 4px 12px;
+    padding: 4px 14px;
     border-radius: 20px;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.5px;
 }
-.logo-section h3 { margin: 12px 0 6px 0; font-size: 20px; color: #1e293b; }
-.subtitle { font-size: 13px; color: #64748b; margin: 0; padding: 0 10px; }
+.logo-section h3 { margin: 14px 0 6px 0; font-size: 22px; color: #1e293b; }
+.subtitle { font-size: 13px; color: #64748b; margin: 0; padding: 0 10px; line-height: 1.5; }
 
-.section-title { font-size: 15px; color: #334155; margin-bottom: 12px; font-weight: 500; }
+.section-title { font-size: 15px; color: #475569; margin-bottom: 14px; font-weight: 500; }
 
-/* การ์ดเลือกน้ำแบบมีมิติ มินิมอล */
+/* รายการเลือกน้ำแบบคลีนๆ */
 .water-card {
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 16px;
+    border-radius: 18px;
+    padding: 18px;
     display: flex;
     align-items: center;
     margin-bottom: 14px;
     transition: all 0.2s ease;
     cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.01);
 }
 .water-card:active {
     transform: scale(0.97);
@@ -108,9 +109,9 @@ body {
 .volume-badge {
     width: 55px;
     height: 55px;
-    border-radius: 12px;
-    background: #eff6ff;
-    color: #2563eb;
+    border-radius: 14px;
+    background: #ecfeff;
+    color: #0891b2;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -118,58 +119,82 @@ body {
     font-size: 14px;
 }
 .card-details { flex: 1; padding: 0 14px; }
-.water-title { display: block; font-size: 15px; font-weight: 500; color: #1e293b; }
-.water-desc { font-size: 12px; color: #64748b; }
-.price-tag { font-size: 18px; font-weight: 600; color: #2563eb; }
+.water-title { display: block; font-size: 16px; font-weight: 500; color: #1e293b; }
+.water-desc { font-size: 12px; color: #64748b; margin-top: 2px; }
+.price-tag { font-size: 20px; font-weight: 600; color: #2563eb; }
 
-/* หน้าสั่งงานและนับเวลาถอยหลังแบบแอปยุคใหม่ */
+/* จัดหน้าสเต็ปเปิด-ปิด */
 .step-page { display: none; width: 100%; height: 100%; box-sizing: border-box; }
 .step-page.active { display: block; }
 .text-center { text-align: center; }
 
-.payment-page, .working-page { padding-top: 40px; }
-.payment-icon { font-size: 70px; margin-bottom: 15px; }
+/* หน้าชำระเงิน */
+.payment-page { padding-top: 30px; }
+.payment-icon { font-size: 80px; margin-bottom: 15px; animation: bounce 2s infinite; }
+.payment-subtitle { font-size: 14px; color: #475569; padding: 0 20px; }
 .price-display {
     background: #f1f5f9;
-    padding: 12px 24px;
+    padding: 12px 28px;
     border-radius: 30px;
     display: inline-block;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 600;
     color: #1e293b;
-    margin: 20px 0;
+    margin: 24px 0;
+    border: 1px solid #e2e8f0;
 }
 
-/* วงกลมจับเวลาแบบคลีนๆ */
+/* อนิเมชันติ๊กถูก */
+.success-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    animation: scaleUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* หน้ากำลังทำงาน / วงกลมเวลามินิมอล */
+.working-page { padding-top: 30px; }
+.water-drop-animation { font-size: 70px; margin-bottom: 10px; animation: pulse 1.5s infinite; }
+
 .timer-circle {
-    width: 140px;
-    height: 140px;
-    border: 6px solid #e2e8f0;
+    width: 150px;
+    height: 150px;
+    border: 6px solid #f1f5f9;
     border-top-color: #2563eb;
     border-radius: 50%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin: 40px auto;
+    margin: 35px auto;
     background: #fff;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
-#countdown-timer { font-size: 42px; font-weight: 600; color: #1e293b; line-height: 1; }
-.timer-circle p { margin: 4px 0 0 0; font-size: 12px; color: #64748b; }
+#countdown-timer { font-size: 46px; font-weight: 600; color: #1e293b; line-height: 1; }
+#timer-unit { margin: 6px 0 0 0; font-size: 13px; color: #64748b; font-weight: 400; }
 
-/* ปุ่มต่างๆ ทรงมนทันสมัย */
-button { font-family: 'Kanit', sans-serif; }
-.btn-stop, .btn-submit, .btn-demo {
+/* ปุ่มต่างๆ ทรงมนดูแพง */
+.btn-stop, .btn-demo {
     border: none;
-    padding: 14px 24px;
-    border-radius: 14px;
+    padding: 16px 24px;
+    border-radius: 16px;
     font-size: 16px;
     font-weight: 500;
     cursor: pointer;
     width: 100%;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     transition: all 0.2s ease;
+    box-sizing: border-box;
 }
-.btn-stop:active, .btn-submit:active { transform: scale(0.98); }
-.btn-demo { background-color: #f1f5f9; color: #64748b; margin-top: 40px; font-size: 13px; }
+.btn-stop:active { transform: scale(0.98); }
+.btn-demo { background-color: #f1f5f9; color: #475569; margin-top: 50px; font-size: 13px; border: 1px dashed #cbd5e1; }
+
+/* โหลดดิ้งจุดวิ่งๆ */
+.loading-dots { display: flex; justify-content: center; margin: 20px 0; }
+.loading-dots span { width: 8px; height: 8px; margin: 0 4px; background: #2563eb; border-radius: 50%; animation: dotFlashing 1s infinite alternate; }
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+/* Animations */
+@keyframes dotFlashing { 0% { opacity: 0.2; } 100% { opacity: 1; } }
+@keyframes scaleUp { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+@keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } }
