@@ -20,8 +20,7 @@ function startDispensing() {
     clearInterval(countdownInterval); // ถ้ากำลังจ่ายน้ำ ให้หยุดนับเวลาถอยหลัง 30 วิ
     
     // อัปเดตหน้าจอแสดงผล
-    document.getElementById("countdown-timer").innerText = "⏳";
-    document.querySelector(".water-drop-animation").style.display = "block";
+    document.getElementById("countdown-timer").innerText = "💧";
     document.querySelector("#step3 h2").innerText = "กำลังจ่ายน้ำ...";
     
     // เปลี่ยนปุ่มให้แสดงคำว่า "🛑 กดหยุดจ่ายน้ำชั่วคราว"
@@ -29,19 +28,20 @@ function startDispensing() {
     actionBtn.innerText = "🛑 กดหยุดจ่ายน้ำชั่วคราว";
     actionBtn.setAttribute("onclick", "pauseDispenser()");
     actionBtn.style.backgroundColor = "#dc3545"; // สีแดง
+    actionBtn.style.color = "white";
 }
 
 // ฟังก์ชันสั่งให้ "หยุดจ่ายน้ำชั่วคราว" (น้ำหยุด และเริ่มนับถอยหลัง 30 วิ)
 function pauseDispenser() {
     isDispensing = false;
-    document.querySelector(".water-drop-animation").style.display = "none";
     document.querySelector("#step3 h2").innerText = "หยุดจ่ายน้ำชั่วคราว";
     
     // เปลี่ยนปุ่มให้แสดงคำว่า "▶️ กดจ่ายน้ำต่อ"
     let actionBtn = document.querySelector(".btn-stop");
     actionBtn.innerText = "▶️ กดจ่ายน้ำต่อ";
     actionBtn.setAttribute("onclick", "startDispensing()");
-    actionBtn.style.backgroundColor = "#28a745"; // สีเขียว
+    actionBtn.style.backgroundColor = "#22c55e"; // สีเขียว
+    actionBtn.style.color = "white";
     
     // เริ่มจับเวลาถอยหลัง 30 วินาทีทันที!
     timeLeft = 30;
@@ -77,8 +77,14 @@ function resetToHome() {
 // ==========================================
 // ฟังก์ชันจัดการหน้าสมัครสมาชิกแบบเต็มหน้าจอ
 // ==========================================
-function openRegisterModal() { changePage("step1", "registerPage"); }
-define=function closeRegisterPage() { changePage("registerPage", "step1"); }
+function openRegisterModal() { 
+    changePage("step1", "registerPage"); 
+}
+
+function closeRegisterPage() { 
+    changePage("registerPage", "step1"); 
+}
+
 function submitRegister() {
     alert("สมัครสมาชิกสำเร็จ! ระบบได้บันทึกข้อมูลเรียบร้อยแล้วครับ");
     changePage("registerPage", "step1");
