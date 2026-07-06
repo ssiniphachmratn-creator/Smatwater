@@ -1,3 +1,21 @@
+// 1. นำเข้าไลบรารีที่จำเป็น (เปลี่ยนจาก Analytics เป็น Firestore)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+// 2. ตั้งค่า Firebase Configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyA9hWjeFmorWdQn5dGu1ut0BMlvaOLK-zY",
+  authDomain: "smartwater1-5e117.firebaseapp.com",
+  projectId: "smartwater1-5e117",
+  storageBucket: "smartwater1-5e117.firebasestorage.app",
+  messagingSenderId: "660889405048",
+  appId: "1:660889405048:web:db72a16ca75577c8184f8d",
+  measurementId: "G-EQMM2X3KSC"
+};
+
+// 3. เริ่มต้นใช้งาน Firebase และ Firestore
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app); // ตัวแปร db นี้แหละที่เราจะใช้ยิงข้อมูลเข้า members
 // ==========================================
 // 1. ส่วนตั้งค่า FIREBASE (Config) และเชื่อมต่อ FIRESTORE
 // ==========================================
