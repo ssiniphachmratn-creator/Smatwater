@@ -4,9 +4,8 @@
 
 <div class="app-container">
     
-    <!-- STEP 1: หน้าเลือกรายการน้ำดื่ม -->
+    <!-- STEP 1: หน้าเลือกรายการน้ำดื่ม (หน้าหลัก) -->
     <div id="step1" class="step-page active">
-        <!-- ส่วนหัว (Header) -->
         <div class="header-bar">
             <span>⚙️ Smart Water Dispenser</span>
         </div>
@@ -24,7 +23,7 @@
             <!-- Logo & Status -->
             <div class="logo-section">
                 <div class="logo-circle">
-                    <div class="inner-gear">⚙️</div>
+                    <div class="inner-gear">💧</div>
                 </div>
                 <span class="badge-online">ONLINE</span>
                 <h3>ตู้กดน้ำดื่ม Smart Water</h3>
@@ -35,7 +34,7 @@
             <h4 class="section-title">เลือกรายการน้ำดื่ม</h4>
             
             <div class="water-card" onclick="selectAmount(5)">
-                <div class="volume-badge badge-1">600mL</div>
+                <div class="volume-badge">600mL</div>
                 <div class="card-details">
                     <span class="water-title">น้ำดื่มสะอาด (ขนาดทั่วไป)</span>
                     <span class="water-desc">ปริมาตรประมาณ 600 มิลลิลิตรต่อขวด</span>
@@ -44,25 +43,25 @@
             </div>
 
             <div class="water-card" onclick="selectAmount(10)">
-                <div class="volume-badge badge-2">1L</div>
+                <div class="volume-badge" style="background: #e0f2fe; color: #0369a1;">1L</div>
                 <div class="card-details">
                     <span class="water-title">น้ำดื่มสะอาด (ถังใหญ่)</span>
-                    <span class="water-desc">ปริมาตรใจ สำหรับกระบอกน้ำใหญ่</span>
+                    <span class="water-desc">ปริมาตรจุใจ สำหรับกระบอกน้ำใหญ่</span>
                 </div>
                 <div class="price-tag">10 ฿</div>
             </div>
         </div>
     </div>
 
-    <!-- STEP 2: หน้ากรุณาชำระเงิน -->
+    <!-- STEP 2: หน้าสแกนชำระเงิน -->
     <div id="step2" class="step-page">
         <div class="header-bar">
             <span>💳 ชำระเงิน</span>
         </div>
         <div class="content-body text-center payment-page">
-            <div class="payment-icon">🪙</div>
-            <h2>กรุณาชำระเงินที่หน้าตู้</h2>
-            <p class="payment-subtitle">หยอดเหรียญหรือธนบัตรตามราคาที่เลือก</p>
+            <div class="payment-icon">📱</div>
+            <h2>กรุณาเข้าแอปธนาคาร<br>เพื่อสแกนชำระเงินที่หน้าตู้</h2>
+            <p class="payment-subtitle">ระบบจะแสดง QR Code ชำระเงินบนหน้าจอของตู้กดน้ำ</p>
             
             <div class="price-display">
                 ยอดรวม: <span id="selected-price">0</span> บาท
@@ -73,30 +72,44 @@
             </div>
             <p class="status-text">กำลังรอสัญญาณการชำระเงินจากตู้...</p>
             
-            <button class="btn-demo" onclick="simulateEspSignal()">[เดโม] จำลองว่า ESP ได้รับเงินแล้ว</button>
+            <button class="btn-demo" onclick="simulateEspSignal()">[เดโม] จำลองว่าสแกนจ่ายเงินสำเร็จแล้ว</button>
         </div>
     </div>
 
-    <!-- STEP 3: หน้ากำลังจ่ายน้ำ -->
+    <!-- STEP SUCCESS: หน้าชำระเงินสำเร็จ -->
+    <div id="stepSuccess" class="step-page">
+        <div class="content-body text-center" style="padding-top: 80px;">
+            <div class="success-icon">✅</div>
+            <h2 style="color: #22c55e; font-size: 26px; margin-bottom: 10px;">ชำระเงินสำเร็จ</h2>
+            <p class="subtitle" style="font-size: 15px; color: #64748b;">ระบบกำลังเชื่อมต่อเพื่อเริ่มจ่ายน้ำ...</p>
+            
+            <div class="loading-dots" style="margin-top: 30px;">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 3: หน้ากำลังจ่ายน้ำ / หยุดชั่วคราว -->
     <div id="step3" class="step-page">
         <div class="header-bar">
             <span>💧 ระบบกำลังทำงาน</span>
         </div>
         <div class="content-body text-center working-page">
             <div class="water-drop-animation">💧</div>
-            <h2>กำลังจ่ายน้ำ...</h2>
+            <h2 id="working-status-title">กำลังจ่ายน้ำ...</h2>
             <p class="subtitle">กรุณารอจนกว่าน้ำจะเต็มภาชนะ</p>
             
+            <!-- เคาน์เตอร์วงกลม -->
             <div class="timer-circle">
-                <span id="countdown-timer">30</span>
-                <p>วินาที</p>
+                <span id="countdown-timer">⏳</span>
+                <p id="timer-unit">สถานะปกติ</p>
             </div>
             
-            <button class="btn-stop" onclick="stopDispenser()">🛑 กดหยุดจ่ายน้ำทันที</button>
+            <button class="btn-stop" onclick="pauseDispenser()">🛑 กดหยุดจ่ายน้ำชั่วคราว</button>
         </div>
     </div>
 
-    <!-- หน้าสมัครสมาชิกแบบเต็มหน้าจอ (แทนที่ Popup) -->
+    <!-- REGISTER PAGE: หน้าสมัครสมาชิกแบบเต็มหน้าจอ -->
     <div id="registerPage" class="step-page">
         <div class="header-bar">
             <span>📝 สมัครสมาชิกใหม่</span>
@@ -116,7 +129,7 @@
                 <input type="tel" placeholder="ตัวอย่าง: 0812345678" class="form-input" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box;">
             </div>
 
-            <button class="btn-submit" onclick="submitRegister()" style="background-color: #28a745; color: white; border: none; padding: 14px; border-radius: 8px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 15px;">
+            <button class="btn-submit-form" onclick="submitRegister()" style="background-color: #22c55e; color: white; border: none; padding: 14px; border-radius: 8px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 15px;">
                 ✅ ยืนยันการสมัครสมาชิก
             </button>
             
