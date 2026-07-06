@@ -1,0 +1,192 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #eef2f7;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px 0;
+}
+
+/* โครงตู้จำลองสไตล์ Mobile App */
+.app-container {
+    background: #ffffff;
+    width: 390px;
+    border-radius: 24px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.step-page { display: none; }
+.active { display: block; }
+
+/* Header บาร์สีน้ำเงิน */
+.header-bar {
+    background-color: #2563eb;
+    color: white;
+    padding: 16px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+
+.content-body {
+    padding: 16px;
+}
+
+/* Banner สมัครสมาชิก */
+.member-banner {
+    background: linear-gradient(135deg, #4f46e5, #3b82f6);
+    color: white;
+    padding: 14px 18px;
+    border-radius: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+.banner-text strong { font-size: 0.95rem; display: block; margin-bottom: 2px;}
+.banner-text p { margin: 0; font-size: 0.8rem; opacity: 0.9; }
+.banner-arrow { font-size: 1.2rem; }
+
+/* โลโก้ตรงกลาง */
+.logo-section {
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    margin-bottom: 20px;
+}
+.logo-circle {
+    width: 90px;
+    height: 90px;
+    background-color: #eff6ff;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.inner-gear { font-size: 2.5rem; color: #2563eb; }
+
+.badge-online {
+    background-color: #22c55e;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 3px 10px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 8px;
+}
+.logo-section h3 { margin: 5px 0; color: #1e293b; font-size: 1.2rem; }
+.subtitle { margin: 0; font-size: 0.75rem; color: #94a3b8; }
+
+.section-title {
+    color: #475569;
+    margin: 15px 0 10px 5px;
+    font-size: 0.95rem;
+}
+
+/* การ์ดเลือกน้ำดื่ม */
+.water-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.water-card:hover {
+    border-color: #3b82f6;
+    background-color: #f8fafc;
+    transform: translateY(-1px);
+}
+.volume-badge {
+    width: 45px;
+    height: 45px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+.badge-1l { background-color: #eff6ff; color: #2563eb; }
+.badge-2l { background-color: #f0fdf4; color: #16a34a; }
+
+.card-details {
+    flex-grow: 1;
+    padding: 0 14px;
+    text-align: left;
+}
+.water-title { font-weight: bold; color: #1e293b; display: block; font-size: 0.95rem; }
+.water-desc { color: #94a3b8; font-size: 0.75rem; }
+
+.price-tag {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #2563eb;
+}
+
+/* หน้ากากและปุ่มอื่นๆ */
+button {
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+}
+.btn-primary { background-color: #2563eb; color: white; }
+.btn-danger { background-color: #ef4444; color: white; }
+
+.qr-placeholder {
+    width: 200px;
+    height: 200px;
+    background-color: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    margin: 20px auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.status-box {
+    font-size: 1.2rem;
+    padding: 16px;
+    border-radius: 12px;
+    font-weight: bold;
+}
+.status-working { background-color: #dcfce7; color: #15803d; }
+.status-paused { background-color: #fef3c7; color: #b45309; }
+.status-off { background-color: #fee2e2; color: #b91c1c; }
+
+.timer-countdown {
+    font-size: 4rem;
+    color: #ef4444;
+    font-weight: bold;
+    margin: 25px 0;
+    display: none;
+}
+
+.footer-setting {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-top: 25px;
+    cursor: pointer;
+}
