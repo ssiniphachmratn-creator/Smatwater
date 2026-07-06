@@ -1,6 +1,6 @@
-// 1. นำเข้าไลบรารี Firestore
+// 1. นำเข้าไลบรารี
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, doc, setDoc, onSnapshot, updateDoc, serverTimestamp, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, onSnapshot, updateDoc, serverTimestamp, getDoc, increment, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // 2. ตั้งค่า Firebase
 const firebaseConfig = {
@@ -18,6 +18,7 @@ const db = getFirestore(app);
 
 // ตัวแปรระบบ
 let currentUserPhone = null;
+let countdownInterval;
 
 // 3. ฟังก์ชันระบบสมาชิกและแต้ม
 async function addStamp() {
@@ -29,8 +30,6 @@ async function addStamp() {
 async function getFinalPrice(amount) {
     if (!currentUserPhone) return amount;
     const userDoc = await getDoc(doc(db, "members", currentUserPhone));
-    
-    // เงื่อนไข: ครบ 5 ครั้ง ลด 2 บาท
     if (userDoc.exists() && userDoc.data().stampCount >= 5) {
         alert("🌟 ใช้สิทธิ์ส่วนลดสะสมแต้ม 2 บาท!");
         await updateDoc(doc(db, "members", currentUserPhone), { stampCount: 0 });
@@ -43,60 +42,49 @@ async function getFinalPrice(amount) {
 async function selectAmount(amount) {
     const finalPrice = await getFinalPrice(amount);
     document.getElementById("selected-price").innerText = finalPrice;
-    
-    setDoc(doc(db, "machine_control", "status_doc"), { 
-        status: "pending", 
-        price: finalPrice, 
-        updatedAt: serverTimestamp() 
-    }, { merge: true }).then(() => changePage("step1", "step2"));
+    setDoc(doc(db, "machine_control", "status_doc"), { status: "pending", price: finalPrice, updatedAt: serverTimestamp() }, { merge: true })
+    .then(() => changePage("step1", "step2"));
 }
 
 function submitRegister() {
     const nameInput = document.querySelector("#registerPage input[type='text']");
     const phoneInput = document.querySelector("#registerPage input[type='tel']");
-    
-    if (!nameInput.value || !phoneInput.value) {
-        alert("กรุณากรอกข้อมูลให้ครบ");
-        return;
-    }
+    if (!nameInput.value || !phoneInput.value) { alert("กรุณากรอกข้อมูลให้ครบ"); return; }
 
     setDoc(doc(db, "members", phoneInput.value), {
-        name: nameInput.value,
-        phone: phoneInput.value,
-        registeredAt: serverTimestamp(),
-        stampCount: 0
+        name: nameInput.value, phone: phoneInput.value, registeredAt: serverTimestamp(), stampCount: 0
     }).then(() => {
         alert("บันทึกเข้าสู่ระบบเรียบร้อยแล้ว");
         currentUserPhone = phoneInput.value;
-        nameInput.value = "";
-        phoneInput.value = "";
+        nameInput.value = ""; phoneInput.value = "";
         changePage("registerPage", "step1");
     });
 }
 
-// 5. ดักฟังสถานะและควบคุมตู้
-onSnapshot(doc(db, "machine_control", "status_doc"), (doc) => {
-    if (doc.exists() && document.getElementById("step2").classList.contains("active") && doc.data().status === "paid") {
-        triggerPaymentSuccess();
-    }
-});
-
-function triggerPaymentSuccess() {
-    changePage("step2", "stepSuccess");
-    setTimeout(() => {
-        changePage("stepSuccess", "step3");
-        updateDoc(doc(db, "machine_control", "status_doc"), { status: "dispensing" });
-        startDispensing();
-    }, 2000);
-}
-
-function startDispensing() {
-    document.getElementById("working-status-title").innerText = "กำลังจ่ายน้ำ...";
-    document.getElementById("btn-main-action").innerText = "🛑 กดหยุดจ่ายน้ำชั่วคราว";
+// 5. ระบบควบคุมตู้และ Timer
+function pauseDispenser() {
+    updateDoc(doc(db, "machine_control", "status_doc"), { status: "paused" });
+    document.getElementById("working-status-title").innerText = "หยุดจ่ายน้ำชั่วคราว";
+    
+    let pauseTimeLeft = 60; 
+    clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
+        pauseTimeLeft--;
+        if (pauseTimeLeft <= 0) {
+            clearInterval(countdownInterval);
+            alert("หมดเวลา! ระบบตัดการจ่ายน้ำอัตโนมัติ");
+            updateDoc(doc(db, "machine_control", "status_doc"), { status: "completed" });
+            changePage("step3", "step1");
+        }
+    }, 1000);
 }
 
 function completeTransaction() {
-    addStamp();
+    const price = document.getElementById("selected-price").innerText;
+    if (currentUserPhone) {
+        addDoc(collection(db, "transactions"), { phone: currentUserPhone, price: price, timestamp: serverTimestamp() });
+        addStamp();
+    }
     changePage("step3", "step1");
 }
 
@@ -109,9 +97,9 @@ function changePage(hideId, showId) {
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btn-water-5")?.addEventListener("click", () => selectAmount(5));
     document.getElementById("btn-water-10")?.addEventListener("click", () => selectAmount(10));
-    document.getElementById("btn-simulate-esp")?.addEventListener("click", () => updateDoc(doc(db, "machine_control", "status_doc"), { status: "paid" }));
     document.getElementById("btn-submit-register")?.addEventListener("click", submitRegister);
-    document.getElementById("btn-goto-register")?.addEventListener("click", () => changePage("step1", "registerPage"));
-    document.getElementById("btn-cancel-register")?.addEventListener("click", () => changePage("registerPage", "step1"));
-    document.getElementById("btn-main-action")?.addEventListener("click", completeTransaction);
+    document.getElementById("btn-main-action")?.addEventListener("click", () => {
+        const status = document.getElementById("working-status-title").innerText;
+        status.includes("จ่ายน้ำ") ? pauseDispenser() : completeTransaction();
+    });
 });
