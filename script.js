@@ -1,32 +1,54 @@
+// 1. นำเข้าไลบรารี Firestore
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, doc, setDoc, onSnapshot, updateDoc, serverTimestamp, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// ... (Firebase Config คงเดิม) ...
+// 2. ตั้งค่า Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyA9hWjeFmorWdQn5dGu1ut0BMlvaOLK-zY",
+  authDomain: "smartwater1-5e117.firebaseapp.com",
+  projectId: "smartwater1-5e117",
+  storageBucket: "smartwater1-5e117.firebasestorage.app",
+  messagingSenderId: "660889405048",
+  appId: "1:660889405048:web:db72a16ca75577c8184f8d",
+  measurementId: "G-EQMM2X3KSC"
+};
 
-// เพิ่มตัวแปรเก็บเบอร์โทรศัพท์ที่ล็อกอินไว้
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ตัวแปรระบบ
 let currentUserPhone = null;
 
-// ฟังก์ชันเพิ่มแต้มอัตโนมัติ (เรียกใช้ตอนจ่ายน้ำเสร็จ)
-async function addStamp(phone) {
-    if (!phone) return;
-    const userRef = doc(db, "members", phone);
-    await updateDoc(userRef, {
-        stampCount: increment(1) // เพิ่มแต้มครั้งละ 1
-    });
-    console.log("เพิ่มแต้มสำเร็จ!");
+// 3. ฟังก์ชันระบบสมาชิกและแต้ม
+async function addStamp() {
+    if (!currentUserPhone) return;
+    const userRef = doc(db, "members", currentUserPhone);
+    await updateDoc(userRef, { stampCount: increment(1) });
 }
 
-// ฟังก์ชันดึงชื่อมาโชว์
-async function showMemberName(phone) {
-    const userDoc = await getDoc(doc(db, "members", phone));
-    if (userDoc.exists()) {
-        const userName = userDoc.data().name;
-        alert("ยินดีต้อนรับคุณ " + userName + " ครับ!");
-        currentUserPhone = phone; // เก็บเบอร์ไว้ใช้ตอนคิดแต้ม
+async function getFinalPrice(amount) {
+    if (!currentUserPhone) return amount;
+    const userDoc = await getDoc(doc(db, "members", currentUserPhone));
+    if (userDoc.exists() && userDoc.data().stampCount >= 3) {
+        alert("🌟 ใช้สิทธิ์ส่วนลดสะสมแต้ม 5 บาท!");
+        await updateDoc(doc(db, "members", currentUserPhone), { stampCount: 0 });
+        return amount - 5;
     }
+    return amount;
 }
 
-// แก้ไขฟังก์ชัน submitRegister เดิมเล็กน้อย
+// 4. ฟังก์ชันการทำงานหลัก
+async function selectAmount(amount) {
+    const finalPrice = await getFinalPrice(amount);
+    document.getElementById("selected-price").innerText = finalPrice;
+    
+    setDoc(doc(db, "machine_control", "status_doc"), { 
+        status: "pending", 
+        price: finalPrice, 
+        updatedAt: serverTimestamp() 
+    }, { merge: true }).then(() => changePage("step1", "step2"));
+}
+
 function submitRegister() {
     const nameInput = document.querySelector("#registerPage input[type='text']");
     const phoneInput = document.querySelector("#registerPage input[type='tel']");
@@ -43,18 +65,53 @@ function submitRegister() {
         stampCount: 0
     }).then(() => {
         alert("บันทึกเข้าสู่ระบบเรียบร้อยแล้ว");
-        currentUserPhone = phoneInput.value; // จำเบอร์ไว้
+        currentUserPhone = phoneInput.value;
         nameInput.value = "";
         phoneInput.value = "";
         changePage("registerPage", "step1");
     });
 }
 
-// เรียกใช้ addStamp ตอนจบกระบวนการ (ในฟังก์ชันที่จ่ายน้ำเสร็จ)
-// ตรงส่วน resetToHome หรือตอนที่ระบบเปลี่ยนสถานะเป็น completed
-function finishTransaction() {
-    if (currentUserPhone) {
-        addStamp(currentUserPhone);
+// 5. ดักฟังสถานะและควบคุมตู้
+onSnapshot(doc(db, "machine_control", "status_doc"), (doc) => {
+    if (doc.exists() && document.getElementById("step2").classList.contains("active") && doc.data().status === "paid") {
+        triggerPaymentSuccess();
     }
-    resetToHome();
+});
+
+function triggerPaymentSuccess() {
+    changePage("step2", "stepSuccess");
+    setTimeout(() => {
+        changePage("stepSuccess", "step3");
+        updateDoc(doc(db, "machine_control", "status_doc"), { status: "dispensing" });
+        startDispensing();
+    }, 2000);
 }
+
+function startDispensing() {
+    document.getElementById("working-status-title").innerText = "กำลังจ่ายน้ำ...";
+    document.getElementById("btn-main-action").innerText = "🛑 กดหยุดจ่ายน้ำชั่วคราว";
+}
+
+// จบการจ่ายน้ำ ให้เพิ่มแต้ม
+function completeTransaction() {
+    addStamp();
+    changePage("step3", "step1");
+}
+
+function changePage(hideId, showId) {
+    document.getElementById(hideId).classList.remove("active");
+    document.getElementById(showId).classList.add("active");
+}
+
+// ผูกปุ่ม
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("btn-water-5")?.addEventListener("click", () => selectAmount(5));
+    document.getElementById("btn-water-10")?.addEventListener("click", () => selectAmount(10));
+    document.getElementById("btn-simulate-esp")?.addEventListener("click", () => () => updateDoc(doc(db, "machine_control", "status_doc"), { status: "paid" }));
+    document.getElementById("btn-submit-register")?.addEventListener("click", submitRegister);
+    document.getElementById("btn-goto-register")?.addEventListener("click", () => changePage("step1", "registerPage"));
+    document.getElementById("btn-cancel-register")?.addEventListener("click", () => changePage("registerPage", "step1"));
+    // เพิ่มปุ่มจบรายการ (ที่หน้า Step 3 ให้กดเพื่อกลับหน้าแรกและเพิ่มแต้ม)
+    document.getElementById("btn-main-action")?.addEventListener("click", completeTransaction);
+});
