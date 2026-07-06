@@ -1,18 +1,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="./style.css">
-<!-- ดึง script.js มาทำงานแบบ type="module" -->
-<script src="./script.js" type="module" defer></script>
+<script src="./script.js" defer></script>
 
 <div class="app-container">
     
-    <!-- STEP 1: หน้าเลือกรายการน้ำดื่ม (หน้าหลัก) -->
     <div id="step1" class="step-page active">
         <div class="header-bar">
             <span>⚙️ Smart Water Dispenser</span>
         </div>
         
         <div class="content-body">
-            <!-- Banner สมัครสมาชิก -->
             <div class="member-banner" id="btn-goto-register" style="cursor: pointer;">
                 <div class="banner-text">
                     <strong>🌟 สมัครสมาชิกเพื่อรับส่วนลด</strong>
@@ -21,7 +18,6 @@
                 <div class="banner-arrow">➔</div>
             </div>
 
-            <!-- Logo & Status -->
             <div class="logo-section">
                 <div class="logo-circle">
                     <div class="inner-gear">💧</div>
@@ -31,7 +27,6 @@
                 <p class="subtitle">กรุณานำแก้วหรือขวดน้ำมาวางที่ช่องจ่ายน้ำก่อนสั่งซื้อ</p>
             </div>
 
-            <!-- List รายการน้ำดื่ม -->
             <h4 class="section-title">เลือกรายการน้ำดื่ม</h4>
             
             <div class="water-card" id="btn-water-5">
@@ -54,7 +49,6 @@
         </div>
     </div>
 
-    <!-- STEP 2: หน้าสแกนชำระเงิน -->
     <div id="step2" class="step-page">
         <div class="header-bar">
             <span>💳 ชำระเงิน</span>
@@ -77,7 +71,6 @@
         </div>
     </div>
 
-    <!-- STEP SUCCESS: หน้าชำระเงินสำเร็จ -->
     <div id="stepSuccess" class="step-page">
         <div class="content-body text-center" style="padding-top: 80px;">
             <div class="success-icon">✅</div>
@@ -90,7 +83,6 @@
         </div>
     </div>
 
-    <!-- STEP 3: หน้ากำลังจ่ายน้ำ / หยุดชั่วคราว -->
     <div id="step3" class="step-page">
         <div class="header-bar">
             <span>💧 ระบบกำลังทำงาน</span>
@@ -100,7 +92,6 @@
             <h2 id="working-status-title">กำลังจ่ายน้ำ...</h2>
             <p class="subtitle">กรุณารอจนกว่าน้ำจะเต็มภาชนะ</p>
             
-            <!-- เคาน์เตอร์วงกลม -->
             <div class="timer-circle">
                 <span id="countdown-timer">⏳</span>
                 <p id="timer-unit">สถานะปกติ</p>
@@ -110,7 +101,6 @@
         </div>
     </div>
 
-    <!-- REGISTER PAGE: หน้าสมัครสมาชิกแบบเต็มหน้าจอ -->
     <div id="registerPage" class="step-page">
         <div class="header-bar">
             <span>📝 สมัครสมาชิกใหม่</span>
@@ -141,3 +131,6 @@
     </div>
 
 </div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
