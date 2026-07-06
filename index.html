@@ -1,7 +1,6 @@
 <link rel="stylesheet" href="./style.css">
 <script src="./script.js" defer></script>
 <div class="app-container">
-    <!-- ขั้นตอนที่ 1: หน้าเลือกรายการน้ำดื่ม (ถอดแบบจากรูป image_b6879e.png) -->
     <div id="step1" class="step-page active">
         <!-- Header -->
         <div class="header-bar">
@@ -9,8 +8,8 @@
         </div>
 
         <div class="content-body">
-            <!-- Banner สมัครสมาชิก -->
-            <div class="member-banner">
+            <!-- Banner สมัครสมาชิก (เพิ่มระบบกดเปิด Popup) -->
+            <div class="member-banner" onclick="openRegisterModal()" style="cursor: pointer;">
                 <div class="banner-text">
                     <strong>🌟 สมัครสมาชิกเพื่อรับส่วนลด</strong>
                     <p>ซื้อครบทุก 3 ขวด รับส่วนลดฟรีทันที!</p>
@@ -30,7 +29,7 @@
 
             <!-- List เลือกรายการน้ำดื่ม -->
             <h4 class="section-title">เลือกรายการน้ำดื่ม</h4>
-            
+
             <!-- รายการที่ 1: 5 บาท -->
             <div class="water-card" onclick="selectAmount(5)">
                 <div class="volume-badge badge-1l">600mL</div>
@@ -43,50 +42,25 @@
 
             <!-- รายการที่ 2: 10 บาท -->
             <div class="water-card" onclick="selectAmount(10)">
-                <div class="volume-badge badge-2l">1L</div>
+                <div class="volume-badge">1L</div>
                 <div class="card-details">
                     <span class="water-title">น้ำดื่มสะอาด (ถังใหญ่)</span>
-                    <span class="water-desc">ปริมาณจุใจ สำหรับกระบอกน้ำใหญ่</span>
+                    <span class="water-desc">ปริมาตรใจ สำหรับกระบอกน้ำใหญ่</span>
                 </div>
                 <div class="price-tag">10 ฿</div>
             </div>
-
-            <!-- Footer ด้านล่างสุด -->
-            <div class="footer-setting">
-                ⚙️ ระบบจัดการหลังบ้านหน้าตู้
-            </div>
         </div>
     </div>
+</div>
 
-    <!-- ขั้นตอนที่ 2: หน้าธนาคาร / QR Code ชำระเงิน -->
-    <div id="step2" class="step-page">
-        <div class="header-bar">
-            <span>ชำระเงินผ่านธนาคาร</span>
-        </div>
-        <div class="content-body" style="text-align: center; padding-top: 30px;">
-            <p>จำนวนเงินที่เลือก: <strong style="color: #2563eb; font-size: 1.3rem;"><span id="selectedPrice">0</span> บาท</strong></p>
-            <div class="qr-placeholder">
-                <div style="font-size: 3rem; margin-bottom: 10px;">📱</div>
-                [ รูป QR Code PromptPay ]
-            </div>
-            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">ระบบจะนำทางไปหน้าจ่ายน้ำอัตโนมัติเมื่อชำระสำเร็จ</p>
-            <button class="btn-primary" onclick="mockPaymentSuccess()">จำลองสถานะ: จ่ายเงินสำเร็จ</button>
-        </div>
-    </div>
-
-    <!-- ขั้นตอนที่ 3: หน้าควบคุมการจ่ายน้ำ (ตัดเมนูธนาคารออก + นับถอยหลัง 30 วิ) -->
-    <div id="step3" class="step-page">
-        <div class="header-bar">
-            <span>ระบบควบคุมการจ่ายน้ำ</span>
-        </div>
-        <div class="content-body" style="text-align: center; padding-top: 40px;">
-            <div id="statusDisplay" class="status-box status-working">กำลังจ่ายน้ำ...</div>
-            
-            <!-- ตัวนับถอยหลัง 30 วินาที -->
-            <div id="timerCountdown" class="timer-countdown">30</div>
-
-            <button id="btnStart" class="btn-primary" onclick="startWater()" style="display: none; margin-top: 20px;">จ่ายน้ำต่อ</button>
-            <button id="btnPause" class="btn-danger" onclick="pauseWater()" style="margin-top: 20px;">หยุดจ่ายน้ำ</button>
-        </div>
+<!-- ส่วนที่เพิ่มใหม่: กล่อง Popup สำหรับกรอกข้อมูลสมัครสมาชิก -->
+<div id="registerModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeRegisterModal()">&times;</span>
+        <h2>สมัครสมาชิกตู้แอป Smart Water</h2>
+        <p>กรอกข้อมูลเพื่อรับส่วนลดพิเศษ</p>
+        <input type="text" placeholder="ชื่อ-นามสกุล" class="form-input" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box;">
+        <input type="tel" placeholder="เบอร์โทรศัพท์" class="form-input" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box;">
+        <button class="btn-submit" onclick="submitRegister()">ยืนยันการสมัคร</button>
     </div>
 </div>
