@@ -60,3 +60,18 @@ function cutOffMachine() {
         document.getElementById('btnPause').style.display = "block";
     }, 3000);
 }
+// ฟังก์ชันเปิด Popup สมัครสมาชิก
+function openRegisterModal() {
+    document.getElementById("registerModal").style.display = "flex";
+}
+
+// ฟังก์ชันปิด Popup สมัครสมาชิก
+function closeRegisterModal() {
+    document.getElementById("registerModal").style.display = "none";
+}
+
+// ฟังก์ชันเมื่อกดปุ่มยืนยันการสมัคร
+function submitRegister() {
+    alert("สมัครสมาชิกสำเร็จ! คุณได้รับส่วนลดเรียบร้อยแล้วครับ");
+    closeRegisterModal();
+}
