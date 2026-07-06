@@ -1,49 +1,63 @@
-let countdownInterval; // ตัวแปรสำหรับจับเวลา
-let timeLeft = 30;     // เวลาเริ่มต้น 30 วินาที
+let countdownInterval;  // ตัวแปรสำหรับจับเวลา
+let timeLeft = 30;      // เวลาถอยหลังเมื่อกดหยุดน้ำ (30 วินาที)
+let isDispensing = false; // สถานะการจ่ายน้ำ (true = กำลังไหล, false = หยุดชั่วคราว)
 
 // ฟังก์ชันเมื่อกดเลือกรายการน้ำดื่ม (5 หรือ 10 บาท)
 function selectAmount(amount) {
-    // 1. แสดงราคาน้ำในหน้าชำระเงิน
     document.getElementById("selected-price").innerText = amount;
-    
-    // 2. สั่งเปลี่ยนจากหน้าสเต็ป 1 ไป หน้าสเต็ป 2 (หน้าชำระเงิน)
     changePage("step1", "step2");
 }
 
-// ฟังก์ชันจำลองเมื่อบอร์ด ESP ส่งสัญญาณกลับมาว่า "ได้รับเงินเรียบร้อยแล้ว"
+// ฟังก์ชันเมื่อบอร์ด ESP ส่งสัญญาณกลับมาว่า "ได้รับเงินเรียบร้อยแล้ว"
 function simulateEspSignal() {
-    // เปลี่ยนหน้าไปสเต็ป 3 (หน้าจ่ายน้ำ)
     changePage("step2", "step3");
-    // เริ่มต้นนับเวลาถอยหลัง 30 วินาที
-    startCountdown();
+    startDispensing(); // เริ่มต้นด้วยการจ่ายน้ำทันที
 }
 
-// ฟังก์ชันเริ่มต้นนับเวลาถอยหลัง
-function startCountdown() {
-    timeLeft = 30; // รีเซ็ตเวลาเป็น 30
-    document.getElementById("countdown-timer").innerText = timeLeft;
+// ฟังก์ชันสั่งให้ "จ่ายน้ำ" (น้ำไหล)
+function startDispensing() {
+    isDispensing = true;
+    clearInterval(countdownInterval); // ถ้ากำลังจ่ายน้ำ ให้หยุดนับเวลาถอยหลัง 30 วิ
     
-    // ล้าง Interval เก่าออกก่อนป้องกันการทำงานซ้อนกัน
-    clearInterval(countdownInterval);
+    // อัปเดตหน้าจอแสดงผล
+    document.getElementById("countdown-timer").innerText = "⏳";
+    document.querySelector(".water-drop-animation").style.display = "block";
+    document.querySelector("#step3 h2").innerText = "กำลังจ่ายน้ำ...";
+    
+    // เปลี่ยนปุ่มให้แสดงคำว่า "🛑 กดหยุดจ่ายน้ำชั่วคราว"
+    let actionBtn = document.querySelector(".btn-stop");
+    actionBtn.innerText = "🛑 กดหยุดจ่ายน้ำชั่วคราว";
+    actionBtn.setAttribute("onclick", "pauseDispenser()");
+    actionBtn.style.backgroundColor = "#dc3545"; // สีแดง
+}
+
+// ฟังก์ชันสั่งให้ "หยุดจ่ายน้ำชั่วคราว" (น้ำหยุด และเริ่มนับถอยหลัง 30 วิ)
+function pauseDispenser() {
+    isDispensing = false;
+    document.querySelector(".water-drop-animation").style.display = "none";
+    document.querySelector("#step3 h2").innerText = "หยุดจ่ายน้ำชั่วคราว";
+    
+    // เปลี่ยนปุ่มให้แสดงคำว่า "▶️ กดจ่ายน้ำต่อ"
+    let actionBtn = document.querySelector(".btn-stop");
+    actionBtn.innerText = "▶️ กดจ่ายน้ำต่อ";
+    actionBtn.setAttribute("onclick", "startDispensing()");
+    actionBtn.style.backgroundColor = "#28a745"; // สีเขียว
+    
+    // เริ่มจับเวลาถอยหลัง 30 วินาทีทันที!
+    timeLeft = 30;
+    document.getElementById("countdown-timer").innerText = timeLeft;
     
     countdownInterval = setInterval(function() {
         timeLeft--;
         document.getElementById("countdown-timer").innerText = timeLeft;
         
-        // ถ้าครบ 30 วินาที ให้ระบบตัดการทำงานทันที
+        // หากหยุดน้ำค้างไว้นานจนครบ 30 วินาที ระบบจะตัดการทำงานทันที
         if (timeLeft <= 0) {
             clearInterval(countdownInterval);
-            alert("หมดเวลา 30 วินาที! ระบบตัดการจ่ายน้ำเรียบร้อยแล้วครับ");
+            alert("คุณหยุดน้ำค้างไว้นานเกิน 30 วินาที ระบบตัดการทำงานอัตโนมัติครับ");
             resetToHome();
         }
-    }, 1000); // ทำงานทุกๆ 1 วินาที
-}
-
-// ฟังก์ชันเมื่อกดปุ่ม "หยุดจ่ายน้ำทันที"
-function stopDispenser() {
-    clearInterval(countdownInterval); // หยุดนับเวลา
-    alert("คุณได้กดหยุดจ่ายน้ำแล้ว ระบบตัดการทำงานทันทีครับ");
-    resetToHome();
+    }, 1000);
 }
 
 // ฟังก์ชันช่วยเปลี่ยนหน้าจอ
@@ -54,6 +68,8 @@ function changePage(hideId, showId) {
 
 // ฟังก์ชันรีเซ็ตระบบกลับไปหน้าแรกสุด
 function resetToHome() {
+    clearInterval(countdownInterval);
+    isDispensing = false;
     changePage("step3", "step1");
     changePage("step2", "step1");
 }
@@ -61,19 +77,9 @@ function resetToHome() {
 // ==========================================
 // ฟังก์ชันจัดการหน้าสมัครสมาชิกแบบเต็มหน้าจอ
 // ==========================================
-
-// ฟังก์ชันเปิดหน้าสมัครสมาชิก (สลับหน้า)
-function openRegisterModal() {
-    changePage("step1", "registerPage");
-}
-
-// ฟังก์ชันยกเลิกสมัครสมาชิก กลับหน้าแรก
-function closeRegisterPage() {
-    changePage("registerPage", "step1");
-}
-
-// ฟังก์ชันยืนยันการสมัครสมาชิก
+function openRegisterModal() { changePage("step1", "registerPage"); }
+define=function closeRegisterPage() { changePage("registerPage", "step1"); }
 function submitRegister() {
     alert("สมัครสมาชิกสำเร็จ! ระบบได้บันทึกข้อมูลเรียบร้อยแล้วครับ");
-    changePage("registerPage", "step1"); // สลับกลับหน้าแรก
+    changePage("registerPage", "step1");
 }
