@@ -161,3 +161,20 @@ function submitRegister() {
     alert("สมัครสมาชิกสำเร็จ! ระบบได้บันทึกข้อมูลเรียบร้อยแล้วครับ");
     changePage("registerPage", "step1");
 }
+// ==========================================
+// 5. ผูกปุ่มจากหน้าเว็บ (DOM Event Listeners) 
+// เพื่อแก้ปัญหาเวลากดเลือกน้ำและสมัครสมาชิกไม่ได้เมื่อใช้ Module
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+    // ปุ่มเลือกน้ำ 5 บาท และ 10 บาท
+    document.getElementById("btn-water-5")?.addEventListener("click", () => selectAmount(5));
+    document.getElementById("btn-water-10")?.addEventListener("click", () => selectAmount(10));
+    
+    // ปุ่มจำลองเงินเข้าสำหรับเดโม
+    document.getElementById("btn-simulate-esp")?.addEventListener("click", () => simulateEspSignal());
+
+    // ปุ่มเปิด-ปิด หน้าสมัครสมาชิก
+    document.getElementById("btn-goto-register")?.addEventListener("click", () => openRegisterModal());
+    document.getElementById("btn-cancel-register")?.addEventListener("click", () => closeRegisterPage());
+    document.getElementById("btn-submit-register")?.addEventListener("click", () => submitRegister());
+});
