@@ -1,82 +1,72 @@
-let countdownTimer;
-let timeLeft = 30;
+let countdownInterval; // ตัวแปรสำหรับจับเวลา
+let timeLeft = 30;     // เวลาเริ่มต้น 30 วินาที
 
-function navigateTo(stepId) {
-    document.querySelectorAll('.step-page').forEach(page => page.classList.remove('active'));
-    document.getElementById(stepId).classList.add('active');
-}
-
+// ฟังก์ชันเมื่อกดเลือกรายการน้ำดื่ม (5 หรือ 10 บาท)
 function selectAmount(amount) {
-    document.getElementById('selectedPrice').textContent = amount;
-    navigateTo('step2');
-}
-
-function mockPaymentSuccess() {
-    navigateTo('step3');
-    startWater();
-}
-
-function startWater() {
-    clearInterval(countdownTimer);
-    document.getElementById('statusDisplay').textContent = "กำลังจ่ายน้ำ...";
-    document.getElementById('statusDisplay').className = "status-box status-working";
-    document.getElementById('timerCountdown').style.display = "none";
-    document.getElementById('btnStart').style.display = "none";
-    document.getElementById('btnPause').style.display = "block";
-}
-
-function pauseWater() {
-    document.getElementById('statusDisplay').textContent = "หยุดจ่ายน้ำชั่วคราว";
-    document.getElementById('statusDisplay').className = "status-box status-paused";
-    document.getElementById('btnPause').style.display = "none";
-    document.getElementById('btnStart').style.display = "block";
+    // 1. แสดงราคาน้ำในหน้าชำระเงิน
+    document.getElementById("selected-price").innerText = amount;
     
-    timeLeft = 30;
-    const timerDisplay = document.getElementById('timerCountdown');
-    timerDisplay.textContent = timeLeft;
-    timerDisplay.style.display = "block";
+    // 2. สั่งเปลี่ยนจากหน้าสเต็ป 1 ไป หน้าสเต็ป 2 (หน้าชำระเงิน)
+    changePage("step1", "step2");
+}
 
-    countdownTimer = setInterval(() => {
+// ฟังก์ชันจำลองเมื่อบอร์ด ESP ส่งสัญญาณกลับมาว่า "ได้รับเงินเรียบร้อยแล้ว"
+function simulateEspSignal() {
+    // เปลี่ยนหน้าไปสเต็ป 3 (หน้าจ่ายน้ำ)
+    changePage("step2", "step3");
+    // เริ่มต้นนับเวลาถอยหลัง 30 วินาที
+    startCountdown();
+}
+
+// ฟังก์ชันเริ่มต้นนับเวลาถอยหลัง
+function startCountdown() {
+    timeLeft = 30; // รีเซ็ตเวลาเป็น 30
+    document.getElementById("countdown-timer").innerText = timeLeft;
+    
+    // ล้าง Interval เก่าออกก่อนป้องกันการทำงานซ้อนกัน
+    clearInterval(countdownInterval);
+    
+    countdownInterval = setInterval(function() {
         timeLeft--;
-        timerDisplay.textContent = timeLeft;
-
+        document.getElementById("countdown-timer").innerText = timeLeft;
+        
+        // ถ้าครบ 30 วินาที ให้ระบบตัดการทำงานทันที
         if (timeLeft <= 0) {
-            cutOffMachine();
+            clearInterval(countdownInterval);
+            alert("หมดเวลา 30 วินาที! ระบบตัดการจ่ายน้ำเรียบร้อยแล้วครับ");
+            resetToHome();
         }
-    }, 1000);
+    }, 1000); // ทำงานทุกๆ 1 วินาที
 }
 
-function cutOffMachine() {
-    clearInterval(countdownTimer);
-    document.getElementById('statusDisplay').textContent = "หมดเวลา! เครื่องตัดการทำงาน";
-    document.getElementById('statusDisplay').className = "status-box status-off";
-    document.getElementById('timerCountdown').style.display = "none";
-    document.getElementById('btnStart').style.display = "none";
-    document.getElementById('btnPause').style.display = "none";
-    
-    setTimeout(() => {
-        navigateTo('step1');
-        document.getElementById('btnStart').style.display = "none";
-        document.getElementById('btnPause').style.display = "block";
-    }, 3000);
+// ฟังก์ชันเมื่อกดปุ่ม "หยุดจ่ายน้ำทันที"
+function stopDispenser() {
+    clearInterval(countdownInterval); // หยุดนับเวลา
+    alert("คุณได้กดหยุดจ่ายน้ำแล้ว ระบบตัดการทำงานทันทีครับ");
+    resetToHome();
 }
-// ฟังก์ชันเปิด Popup สมัครสมาชิก
+
+// ฟังก์ชันช่วยเปลี่ยนหน้าจอ
+function changePage(hideId, showId) {
+    document.getElementById(hideId).classList.remove("active");
+    document.getElementById(showId).classList.add("active");
+}
+
+// ฟังก์ชันรีเซ็ตระบบกลับไปหน้าแรกสุด
+function resetToHome() {
+    changePage("step3", "step1");
+    changePage("step2", "step1");
+}
+
+// ==========================================
+// ฟังก์ชันของ Popup สมัครสมาชิก (ส่วนเดิม)
 function openRegisterModal() {
     document.getElementById("registerModal").style.display = "flex";
 }
-
-// ฟังก์ชันปิด Popup สมัครสมาชิก
 function closeRegisterModal() {
     document.getElementById("registerModal").style.display = "none";
 }
-
-// ฟังก์ชันเมื่อกดปุ่มยืนยันการสมัคร
 function submitRegister() {
     alert("สมัครสมาชิกสำเร็จ! คุณได้รับส่วนลดเรียบร้อยแล้วครับ");
     closeRegisterModal();
-}
-// ฟังก์ชันเมื่อกดเลือกรายการน้ำดื่ม (5 บาท หรือ 10 บาท)
-function selectAmount(amount) {
-    alert("คุณเลือกรายการน้ำดื่มราคา " + amount + " บาท\nระบบกำลังเตรียมพร้อมสำหรับขั้นตอนต่อไป...");
-    // หลังจากนี้เราสามารถเขียนโค้ดสั่งให้เด้งไปหน้าแสดง QR Code เพื่อชำระเงิน หรือส่งค่าไป Firebase ต่อได้ครับ
 }
