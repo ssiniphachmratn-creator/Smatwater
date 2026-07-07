@@ -9,10 +9,25 @@
 <body>
     <div class="app-container">
         <header><div>⚙️ Smart Water Dispenser</div></header>
-        <div class="banner">
-            <strong>🌟 สมัครสมาชิกเพื่อรับส่วนลด</strong>
-            <p>สะสมครบ 4 ครั้ง รับส่วนลดทันที 2 บาท!</p>
+        
+        <div id="member-banner" class="banner" style="cursor: pointer;">
+            <div id="register-btn">
+                <strong>🌟 สมัครสมาชิกเพื่อรับส่วนลด</strong>
+                <p>สะสมครบ 4 ครั้ง รับส่วนลดทันที 2 บาท!</p>
+            </div>
+            <div id="member-display" style="display:none;">
+                <strong>👤 สวัสดีคุณ: <span id="display-name"></span></strong>
+                <p>เบอร์: <span id="display-phone"></span></p>
+            </div>
         </div>
+
+        <div id="register-modal" style="display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%); background:white; padding:20px; border-radius:15px; box-shadow:0 0 20px rgba(0,0,0,0.3); z-index:100; width: 80%; max-width: 300px;">
+            <h3>สมัครสมาชิก</h3>
+            <input type="text" id="input-name" placeholder="ชื่อ-นามสกุล" style="width:100%; padding:10px; margin:5px 0;">
+            <input type="tel" id="input-phone" placeholder="เบอร์โทรศัพท์" style="width:100%; padding:10px; margin:5px 0;">
+            <button id="save-btn" style="width:100%; padding:10px; background:#2b6cb0; color:white; border:none; border-radius: 5px; cursor: pointer;">ตกลง</button>
+        </div>
+
         <div class="machine-status">
             <div class="icon-circle">⚙️</div>
             <div class="status-badge">ONLINE</div>
