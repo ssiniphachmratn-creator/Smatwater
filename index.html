@@ -2,31 +2,59 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Water</title>
     <link rel="stylesheet" href="./style.css">
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script>
+        const firebaseConfig = { /* ใส่ Config ของแกที่นี่ */ };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    </script>
 </head>
 <body>
     <div class="app-container">
         <div id="step1" class="step-page active">
+            <div class="header"><h1>💧 Smart Water</h1><p>สดชื่น สะอาด ปลอดภัย</p></div>
+            <div class="banner" id="btn-register" onclick="changePage('step1', 'registerPage')">
+                <strong>🌟 สมัครสมาชิกเพื่อรับส่วนลด</strong>
+                <p>ซื้อครบทุก 4 ขวด รับส่วนลด 2 บาท!</p>
             </div>
+            <div class="water-menu">
+                <h3>เลือกปริมาณน้ำ</h3>
+                <div class="water-card" onclick="selectAmount(5)">
+                    <div class="vol">1L</div><div class="info"><span>น้ำดื่มสะอาด (ขนาดทั่วไป)</span></div><div class="price">5 ฿</div>
+                </div>
+                <div class="water-card" onclick="selectAmount(10)">
+                    <div class="vol">2L</div><div class="info"><span>น้ำดื่มสะอาด (ถังใหญ่)</span></div><div class="price">10 ฿</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="registerPage" class="step-page">
+            <h2>📝 สมัครสมาชิก</h2>
+            <input type="tel" id="user-phone" placeholder="กรอกเบอร์โทรศัพท์" class="input-field">
+            <button onclick="saveMember()" class="btn-main">ยืนยันสมัครสมาชิก</button>
+            <button onclick="changePage('registerPage', 'step1')" class="btn-ghost">ยกเลิก</button>
+        </div>
 
         <div id="step2" class="step-page">
             <h2>💳 ชำระเงิน</h2>
-            <div id="selected-price">0 ฿</div>
-            <button onclick="simulatePayment()">[เดโม] ชำระเงินสำเร็จ</button>
+            <div class="price-display" id="selected-price">0 ฿</div>
+            <button onclick="simulatePayment()" class="btn-main">✅ [เดโม] จ่ายเงินแล้ว</button>
         </div>
 
         <div id="step3" class="step-page">
             <h2 id="status-text">💧 กำลังจ่ายน้ำ...</h2>
-            <div id="countdown-timer">60</div>
-            <button id="btn-main-action" onclick="toggleDispenser()">🛑 หยุดจ่ายน้ำชั่วคราว</button>
+            <div class="timer" id="countdown-timer">60</div>
+            <button id="btn-main-action" onclick="toggleDispenser()" class="btn-warn">🛑 หยุดจ่ายน้ำชั่วคราว</button>
         </div>
 
         <div id="step4" class="step-page">
-            <h2>✨ จ่ายน้ำเสร็จสิ้น</h2>
-            <button onclick="changePage('step4', 'step1')">กลับหน้าหลัก</button>
+            <div class="success-icon">✨</div>
+            <h2>จ่ายน้ำเสร็จสิ้น</h2>
+            <button onclick="changePage('step4', 'step1')" class="btn-main">กลับหน้าหลัก</button>
         </div>
     </div>
     <script src="./script.js"></script>
