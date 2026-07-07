@@ -1,146 +1,93 @@
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="./style.css">
-<script src="./script.js" defer></script>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Water Dispenser</title>
+    <link rel="stylesheet" href="./style.css">
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyA9hWjeFmorWdQn5dGu1ut0BMlvaOLK-zY",
+        authDomain: "smartwater1-5e117.firebaseapp.com",
+        projectId: "smartwater1-5e117",
+        storageBucket: "smartwater1-5e117.firebasestorage.app",
+        messagingSenderId: "660889405048",
+        appId: "1:660889405048:web:db72a16ca75577c8184f8d",
+        measurementId: "G-EQMM2X3KSC"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+    </script>
+</head>
+<body>
 
 <div class="app-container">
-    
-    <!-- STEP 1: หน้าเลือกรายการน้ำดื่ม (หน้าหลัก) -->
     <div id="step1" class="step-page active">
-        <div class="header-bar">
-            <span>⚙️ Smart Water Dispenser</span>
-        </div>
-        
+        <div class="header-bar"><span>⚙️ Smart Water Dispenser</span></div>
         <div class="content-body">
-            <!-- Banner สมัครสมาชิก -->
             <div class="member-banner" id="btn-goto-register" style="cursor: pointer;">
                 <div class="banner-text">
                     <strong>🌟 สมัครสมาชิกเพื่อรับส่วนลด</strong>
-                    <p>ซื้อครบทุก 3 ขวด รับส่วนลดฟรีทันที!</p>
+                    <p>ซื้อครบทุก 5 ขวด รับส่วนลด 2 บาท!</p>
                 </div>
                 <div class="banner-arrow">➔</div>
             </div>
-
-            <!-- Logo & Status -->
             <div class="logo-section">
-                <div class="logo-circle">
-                    <div class="inner-gear">💧</div>
-                </div>
+                <div class="logo-circle"><div class="inner-gear">💧</div></div>
                 <span class="badge-online">ONLINE</span>
                 <h3>ตู้กดน้ำดื่ม Smart Water</h3>
-                <p class="subtitle">กรุณานำแก้วหรือขวดน้ำมาวางที่ช่องจ่ายน้ำก่อนสั่งซื้อ</p>
             </div>
-
-            <!-- List รายการน้ำดื่ม -->
             <h4 class="section-title">เลือกรายการน้ำดื่ม</h4>
-            
             <div class="water-card" id="btn-water-5">
                 <div class="volume-badge">600mL</div>
                 <div class="card-details">
-                    <span class="water-title">น้ำดื่มสะอาด (ขนาดทั่วไป)</span>
-                    <span class="water-desc">ปริมาตรประมาณ 600 มิลลิลิตรต่อขวด</span>
+                    <span class="water-title">น้ำดื่มสะอาด (ปกติ)</span>
                 </div>
                 <div class="price-tag">5 ฿</div>
             </div>
-
             <div class="water-card" id="btn-water-10">
                 <div class="volume-badge" style="background: #e0f2fe; color: #0369a1;">1L</div>
                 <div class="card-details">
                     <span class="water-title">น้ำดื่มสะอาด (ถังใหญ่)</span>
-                    <span class="water-desc">ปริมาตรจุใจ สำหรับกระบอกน้ำใหญ่</span>
                 </div>
                 <div class="price-tag">10 ฿</div>
             </div>
         </div>
     </div>
 
-    <!-- STEP 2: หน้าสแกนชำระเงิน -->
     <div id="step2" class="step-page">
-        <div class="header-bar">
-            <span>💳 ชำระเงิน</span>
-        </div>
-        <div class="content-body text-center payment-page">
-            <div class="payment-icon">📱</div>
-            <h2>กรุณาเข้าแอปธนาคาร<br>เพื่อสแกนชำระเงินที่หน้าตู้</h2>
-            <p class="payment-subtitle">ระบบจะแสดง QR Code ชำระเงินบนหน้าจอของตู้กดน้ำ</p>
-            
-            <div class="price-display">
-                ยอดรวม: <span id="selected-price">0</span> บาท
-            </div>
-            
-            <div class="loading-dots">
-                <span></span><span></span><span></span>
-            </div>
-            <p class="status-text">กำลังรอสัญญาณการชำระเงินจากตู้...</p>
-            
-            <button class="btn-demo" id="btn-simulate-esp">[เดโม] จำลองว่าสแกนจ่ายเงินสำเร็จแล้ว</button>
+        <div class="header-bar"><span>💳 ชำระเงิน</span></div>
+        <div class="content-body text-center">
+            <h2>สแกนเพื่อชำระเงิน</h2>
+            <div class="price-display">ยอดรวม: <span id="selected-price">0</span> บาท</div>
+            <button class="btn-demo" id="btn-simulate-esp">[เดโม] ชำระเงินสำเร็จ</button>
         </div>
     </div>
 
-    <!-- STEP SUCCESS: หน้าชำระเงินสำเร็จ -->
-    <div id="stepSuccess" class="step-page">
-        <div class="content-body text-center" style="padding-top: 80px;">
-            <div class="success-icon">✅</div>
-            <h2 style="color: #22c55e; font-size: 26px; margin-bottom: 10px;">ชำระเงินสำเร็จ</h2>
-            <p class="subtitle" style="font-size: 15px; color: #64748b;">ระบบกำลังเชื่อมต่อเพื่อเริ่มจ่ายน้ำ...</p>
-            
-            <div class="loading-dots" style="margin-top: 30px;">
-                <span></span><span></span><span></span>
-            </div>
-        </div>
-    </div>
-
-    <!-- STEP 3: หน้ากำลังจ่ายน้ำ / หยุดชั่วคราว -->
     <div id="step3" class="step-page">
-        <div class="header-bar">
-            <span>💧 ระบบกำลังทำงาน</span>
-        </div>
-        <div class="content-body text-center working-page">
-            <div class="water-drop-animation">💧</div>
+        <div class="header-bar"><span>💧 กำลังทำงาน</span></div>
+        <div class="content-body text-center">
             <h2 id="working-status-title">กำลังจ่ายน้ำ...</h2>
-            <p class="subtitle">กรุณารอจนกว่าน้ำจะเต็มภาชนะ</p>
-            
-            <!-- เคาน์เตอร์วงกลม -->
-            <div class="timer-circle">
-                <span id="countdown-timer">⏳</span>
-                <p id="timer-unit">สถานะปกติ</p>
-            </div>
-            
+            <div class="timer-circle"><span id="countdown-timer">⏳</span></div>
             <button class="btn-stop" id="btn-main-action">🛑 กดหยุดจ่ายน้ำชั่วคราว</button>
         </div>
     </div>
 
-    <!-- REGISTER PAGE: หน้าสมัครสมาชิกแบบเต็มหน้าจอ -->
     <div id="registerPage" class="step-page">
-        <div class="header-bar">
-            <span>📝 สมัครสมาชิกใหม่</span>
-        </div>
-        <div class="content-body" style="padding: 20px; text-align: center;">
-            <div style="font-size: 60px; margin-bottom: 20px;">👤</div>
-            <h2>สมัครสมาชิก Smart Water</h2>
-            <p style="color: #666; margin-bottom: 30px;">กรอกข้อมูลของคุณเพื่อรับส่วนลดและสิทธิพิเศษมากมาย</p>
-            
-            <div style="text-align: left; margin-bottom: 20px;">
-                <label style="font-weight: bold; display: block; margin-bottom: 5px;">ชื่อ-นามสกุล</label>
-                <input type="text" placeholder="ตัวอย่าง: สมชาย ใจดี" class="form-input" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box;">
-            </div>
-
-            <div style="text-align: left; margin-bottom: 30px;">
-                <label style="font-weight: bold; display: block; margin-bottom: 5px;">เบอร์โทรศัพท์</label>
-                <input type="tel" placeholder="ตัวอย่าง: 0812345678" class="form-input" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box;">
-            </div>
-
-            <button class="btn-submit-form" id="btn-submit-register" style="background-color: #22c55e; color: white; border: none; padding: 14px; border-radius: 8px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 15px;">
-                ✅ ยืนยันการสมัครสมาชิก
-            </button>
-            
-            <button id="btn-cancel-register" style="background-color: #dc3545; color: white; border: none; padding: 10px; border-radius: 8px; width: 100%; font-size: 14px; cursor: pointer;">
-                ยกเลิกและกลับหน้าหลัก
-            </button>
+        <div class="header-bar"><span>📝 สมัครสมาชิก</span></div>
+        <div class="content-body" style="padding: 20px;">
+            <input type="text" placeholder="ชื่อ-นามสกุล" class="form-input" style="width: 100%; margin-bottom: 10px; padding: 10px;">
+            <input type="tel" placeholder="เบอร์โทรศัพท์" class="form-input" style="width: 100%; margin-bottom: 10px; padding: 10px;">
+            <button id="btn-submit-register" style="width: 100%; padding: 10px;">ยืนยันการสมัคร</button>
+            <button id="btn-cancel-register" style="width: 100%; padding: 10px; margin-top: 10px;">ยกเลิก</button>
         </div>
     </div>
-
 </div>
 
-<!-- โหลด Firebase Core และเปลี่ยนมาโหลด Cloud Firestore แทน Realtime -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="./script.js" defer></script>
+</body>
+</html>
