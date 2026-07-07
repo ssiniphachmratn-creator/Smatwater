@@ -1,59 +1,12 @@
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background-color: #f8fafc;
-    color: #334155;
-    display: flex;
-    justify-content: center;
-    padding: 20px;
-}
-
-.app-container {
-    width: 100%;
-    max-width: 400px;
-    background: #ffffff;
-    padding: 20px;
-    border-radius: 24px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-}
-
+body { font-family: 'Kanit', sans-serif; background: #f4f7f9; display: flex; justify-content: center; }
+.app-container { width: 100%; max-width: 450px; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
 .step-page { display: none; }
-.step-page.active { display: block; animation: fadeIn 0.3s; }
-
-.water-card {
-    background: #f1f5f9;
-    padding: 20px;
-    border-radius: 16px;
-    margin: 10px 0;
-    cursor: pointer;
-    transition: 0.3s;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.water-card:hover { background: #e2e8f0; }
-
-.btn-primary {
-    background: #3b82f6;
-    color: white;
-    border: none;
-    padding: 15px;
-    border-radius: 12px;
-    width: 100%;
-    font-weight: bold;
-}
-
-.timer-circle {
-    width: 120px;
-    height: 120px;
-    border: 4px solid #3b82f6;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    margin: 20px auto;
-    font-weight: bold;
-}
-
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.step-page.active { display: block; }
+.banner { background: #5a67d8; color: white; padding: 15px; border-radius: 15px; margin: 20px 0; cursor: pointer; }
+.water-card { display: flex; align-items: center; background: #fff; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; }
+.vol { background: #e2e8f0; padding: 10px; border-radius: 8px; font-weight: bold; }
+.info { margin-left: 15px; flex-grow: 1; }
+.price { font-weight: bold; font-size: 1.2em; }
+.timer { font-size: 40px; font-weight: bold; color: #5a67d8; text-align: center; margin: 20px 0; }
+.btn-main { background: #5a67d8; color: white; width: 100%; padding: 15px; border-radius: 10px; border: none; }
+.btn-warn { background: #ed8936; color: white; width: 100%; padding: 15px; border-radius: 10px; border: none; }
