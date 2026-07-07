@@ -1,87 +1,58 @@
-// --- ฟังก์ชันหลัก ---
+const firebaseConfig = { /* ใส่ Config ของแกที่นี่ */ };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-// เปลี่ยนหน้า (ซ่อนอันเก่า, แสดงอันใหม่)
+let countdown;
+let timeLeft = 60;
+
 function changePage(hideId, showId) {
-    document.getElementById(hideId).classList.remove("active");
-    document.getElementById(showId).classList.add("active");
+    document.querySelectorAll('.step-page').forEach(p => p.classList.remove('active'));
+    document.getElementById(showId).classList.add('active');
 }
 
-// เลือกน้ำดื่ม -> อัปเดต Firestore -> ไปหน้าจ่ายเงิน
-function selectAmount(amount) {
-    document.getElementById("selected-price").innerText = amount;
-    db.collection("machine_control").doc("status_doc").set({
-        status: "pending",
-        price: amount,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true }).then(() => changePage("step1", "step2"));
+function selectAmount(price, ml) {
+    document.getElementById("selected-price").innerText = price + " ฿";
+    db.collection("machine_control").doc("status_doc").set({ status: "pending", price: price }, { merge: true });
+    changePage("step1", "step2");
 }
 
-// ระบบหยุดน้ำชั่วคราว (Toggle)
+window.simulatePayment = function() {
+    changePage("step2", "step3");
+    startDispensing();
+};
+
+function startDispensing() {
+    timeLeft = 60;
+    document.getElementById("status-text").innerText = "💧 กำลังจ่ายน้ำ...";
+    document.getElementById("btn-main-action").innerText = "🛑 หยุดจ่ายน้ำชั่วคราว";
+    
+    clearInterval(countdown);
+    countdown = setInterval(() => {
+        timeLeft--;
+        document.getElementById("countdown-timer").innerText = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(countdown);
+            changePage("step3", "step1"); // กลับหน้าหลักเมื่อหมดเวลา
+        }
+    }, 1000);
+}
+
 function toggleDispenser() {
     const btn = document.getElementById("btn-main-action");
-    const statusTitle = document.getElementById("working-status-title");
-
     if (btn.innerText.includes("หยุด")) {
-        // กดหยุด
-        db.collection("machine_control").doc("status_doc").update({ status: "paused" });
-        statusTitle.innerText = "หยุดจ่ายน้ำชั่วคราว";
-        btn.innerText = "▶️ กดจ่ายน้ำต่อ";
+        clearInterval(countdown);
+        btn.innerText = "▶️ จ่ายน้ำต่อ";
+        document.getElementById("status-text").innerText = "⏸️ หยุดชั่วคราว";
     } else {
-        // กดจ่ายต่อ
-        db.collection("machine_control").doc("status_doc").update({ status: "dispensing" });
-        statusTitle.innerText = "กำลังจ่ายน้ำ...";
-        btn.innerText = "🛑 กดหยุดจ่ายน้ำชั่วคราว";
+        startDispensing();
     }
 }
 
-// สมัครสมาชิก
-function submitRegister() {
-    const inputs = document.querySelectorAll("#registerPage input");
-    const name = inputs[0].value;
-    const phone = inputs[1].value;
-    
-    if(!name || !phone) { alert("กรุณากรอกข้อมูลให้ครบ"); return; }
-    
-    db.collection("members").doc(phone).set({ 
-        name: name, 
-        phone: phone, 
-        stampCount: 0 
-    }).then(() => {
-        alert("สมัครสมาชิกสำเร็จ!");
-        inputs[0].value = "";
-        inputs[1].value = "";
-        changePage("registerPage", "step1");
-    });
+// ระบบสมาชิก (เช็คครบ 4 ครั้งลด 2 บาท)
+async function checkStamp(phone) {
+    const doc = await db.collection("members").doc(phone).get();
+    if(doc.exists && doc.data().stampCount >= 4) {
+        alert("คุณได้รับส่วนลด 2 บาท!");
+        // โค้ดลดราคา...
+    }
 }
-
-// --- ผูกปุ่มทั้งหมดเมื่อโหลดหน้าเว็บ ---
-document.addEventListener("DOMContentLoaded", () => {
-    // หน้าหลัก
-    document.getElementById("btn-water-5").onclick = () => selectAmount(5);
-    document.getElementById("btn-water-10").onclick = () => selectAmount(10);
-    document.getElementById("btn-goto-register").onclick = () => changePage("step1", "registerPage");
-
-    // หน้าชำระเงิน
-    document.getElementById("btn-simulate-esp").onclick = () => changePage("step2", "step3");
-    document.getElementById("btn-back-to-home").onclick = () => changePage("step2", "step1");
-
-    // หน้าจ่ายน้ำ
-    document.getElementById("btn-main-action").onclick = toggleDispenser;
-
-    // หน้าสมัครสมาชิก
-    document.getElementById("btn-submit-register").onclick = submitRegister;
-    document.getElementById("btn-cancel-register").onclick = () => changePage("registerPage", "step1");
-});
-// --- วางไว้ใน script.js ตรงไหนก็ได้ที่อยู่นอกก้อน DOMContentLoaded ---
-
-window.simulatePayment = function() {
-    console.log("ปุ่มเดโมทำงานแล้ว!"); // เอาไว้เช็กใน F12 ว่ากดติดไหม
-    
-    // เปลี่ยนหน้าไป Step 3
-    changePage("step2", "step3");
-    
-    // อัปเดตสถานะ Firebase
-    db.collection("machine_control").doc("status_doc").update({
-        status: "dispensing"
-    }).catch(err => console.error("Firebase Error:", err));
-};
