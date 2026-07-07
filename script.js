@@ -10,7 +10,7 @@ function changePage(hideId, showId) {
     document.getElementById(showId).classList.add('active');
 }
 
-function selectAmount(price, ml) {
+function selectAmount(price) {
     document.getElementById("selected-price").innerText = price + " ฿";
     db.collection("machine_control").doc("status_doc").set({ status: "pending", price: price }, { merge: true });
     changePage("step1", "step2");
@@ -32,7 +32,8 @@ function startDispensing() {
         document.getElementById("countdown-timer").innerText = timeLeft;
         if (timeLeft <= 0) {
             clearInterval(countdown);
-            changePage("step3", "step1"); // กลับหน้าหลักเมื่อหมดเวลา
+            db.collection("machine_control").doc("status_doc").update({ status: "completed" });
+            changePage("step3", "step4"); // เด้งไปหน้าเสร็จสิ้น
         }
     }, 1000);
 }
@@ -40,19 +41,10 @@ function startDispensing() {
 function toggleDispenser() {
     const btn = document.getElementById("btn-main-action");
     if (btn.innerText.includes("หยุด")) {
-        clearInterval(countdown);
+        clearInterval(countdown); // หยุดเวลาไว้
         btn.innerText = "▶️ จ่ายน้ำต่อ";
         document.getElementById("status-text").innerText = "⏸️ หยุดชั่วคราว";
     } else {
-        startDispensing();
-    }
-}
-
-// ระบบสมาชิก (เช็คครบ 4 ครั้งลด 2 บาท)
-async function checkStamp(phone) {
-    const doc = await db.collection("members").doc(phone).get();
-    if(doc.exists && doc.data().stampCount >= 4) {
-        alert("คุณได้รับส่วนลด 2 บาท!");
-        // โค้ดลดราคา...
+        startDispensing(); // เริ่มนับต่อ
     }
 }
