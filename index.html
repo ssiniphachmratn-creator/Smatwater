@@ -1,53 +1,238 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Water</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Water</title>
+
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <div class="app-container">
-        <header><div>⚙️ Smart Water Dispenser</div></header>
-        
-        <div id="member-banner" class="banner" style="cursor: pointer;">
-            <div id="register-btn">
-                <strong>🌟 สมัครสมาชิกเพื่อรับส่วนลด</strong>
-                <p>สะสมครบ 4 ครั้ง รับส่วนลดทันที 2 บาท!</p>
-            </div>
-            <div id="member-display" style="display:none;">
-                <strong>👤 สวัสดีคุณ: <span id="display-name"></span></strong>
-                <p>เบอร์: <span id="display-phone"></span></p>
-            </div>
-        </div>
 
-        <div id="register-modal" style="display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%); background:white; padding:20px; border-radius:15px; box-shadow:0 0 20px rgba(0,0,0,0.3); z-index:100; width: 80%; max-width: 300px;">
-            <h3>สมัครสมาชิก</h3>
-            <input type="text" id="input-name" placeholder="ชื่อ-นามสกุล" style="width:100%; padding:10px; margin:5px 0;">
-            <input type="tel" id="input-phone" placeholder="เบอร์โทรศัพท์" style="width:100%; padding:10px; margin:5px 0;">
-            <button id="save-btn" style="width:100%; padding:10px; background:#2b6cb0; color:white; border:none; border-radius: 5px; cursor: pointer;">ตกลง</button>
-        </div>
+<div class="phone">
 
-        <div class="machine-status">
-            <div class="icon-circle">⚙️</div>
-            <div class="status-badge">ONLINE</div>
-            <h3>ตู้กดน้ำดื่ม Smart Water</h3>
-            <p>กรุณานำแก้วหรือขวดน้ำมาวางที่ช่องจ่ายน้ำก่อนสั่งซื้อ</p>
-        </div>
-        <h3>เลือกรายการน้ำดื่ม</h3>
-        <div class="water-menu">
-            <div class="water-card" data-price="5">
-                <div class="vol-badge">600 ML</div>
-                <div class="info"><strong>น้ำดื่มสะอาด (ขนาดทั่วไป)</strong><br>ปริมาณประมาณ 600 ML</div>
-                <div class="price">5 ฿</div>
-            </div>
-            <div class="water-card" data-price="10">
-                <div class="vol-badge">1 L</div>
-                <div class="info"><strong>น้ำดื่มสะอาด (ถังใหญ่)</strong><br>ปริมาณจุใจ สำหรับกระบอกน้ำใหญ่</div>
-                <div class="price">10 ฿</div>
-            </div>
-        </div>
-    </div>
-    <script src="script.js"></script>
+<!-- ================= HOME ================= -->
+
+<section id="home" class="screen active">
+
+<header>
+
+<h2>💧 Smart Water</h2>
+
+<p>ตู้น้ำอัจฉริยะ</p>
+
+</header>
+
+<div class="card member">
+
+<h3><i class="fa-solid fa-user"></i> สมาชิก</h3>
+
+<input
+type="text"
+id="memberName"
+placeholder="ชื่อสมาชิก">
+
+<button class="blue" onclick="registerMember()">
+
+สมัครสมาชิก
+
+</button>
+
+<div class="discount">
+
+⭐ ซื้อครบ
+
+<span id="buyCount">
+
+0
+
+</span>
+
+/
+
+4 ครั้ง
+
+<br>
+
+รับส่วนลด 2 บาท
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>เลือกน้ำ</h3>
+
+<div class="products">
+
+<div class="product"
+onclick="selectWater('600ml',5)">
+
+<img src="assets/water600.png">
+
+<h4>600 ml</h4>
+
+<p>5 บาท</p>
+
+</div>
+
+<div class="product"
+onclick="selectWater('1L',10)">
+
+<img src="assets/water1l.png">
+
+<h4>1 L</h4>
+
+<p>10 บาท</p>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- ================= PAYMENT ================= -->
+
+<section id="payment" class="screen">
+
+<header>
+
+<h2>ชำระเงิน</h2>
+
+</header>
+
+<div class="card center">
+
+<img
+src="assets/qr.png"
+class="qr">
+
+<h3 id="priceText">
+
+ยอดชำระ
+
+</h3>
+
+<button class="green">
+
+<i class="fa-solid fa-building-columns"></i>
+
+เปิด Mobile Banking
+
+</button>
+
+<button
+class="blue"
+onclick="paymentSuccess()">
+
+ชำระเงินเรียบร้อย
+
+</button>
+
+</div>
+
+</section>
+
+<!-- ================= DISPENSE ================= -->
+
+<section id="dispense" class="screen">
+
+<header>
+
+<h2>กำลังจ่ายน้ำ</h2>
+
+</header>
+
+<div class="timerCircle">
+
+<span id="timer">
+
+60
+
+</span>
+
+</div>
+
+<div class="progress">
+
+<div id="progressBar"></div>
+
+</div>
+
+<button
+class="green"
+onclick="startDispense()">
+
+เริ่มจ่ายน้ำ
+
+</button>
+
+<button
+class="red"
+onclick="stopDispense()">
+
+หยุดจ่ายน้ำ
+
+</button>
+
+<p>
+
+ครบ 1 นาที
+
+ระบบจะหยุดอัตโนมัติ
+
+</p>
+
+</section>
+
+<!-- ================= SUCCESS ================= -->
+
+<section id="success" class="screen">
+
+<div class="success">
+
+<i class="fa-solid fa-circle-check"></i>
+
+<h2>
+
+จ่ายน้ำเสร็จสิ้น
+
+</h2>
+
+<p>
+
+ขอบคุณที่ใช้บริการ
+
+</p>
+
+<button
+class="blue"
+onclick="goHome()">
+
+กลับหน้าหลัก
+
+</button>
+
+</div>
+
+</section>
+
+</div>
+
+<script src="script.js"></script>
+
 </body>
 </html>
