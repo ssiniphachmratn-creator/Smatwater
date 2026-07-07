@@ -3,92 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Water Dispenser</title>
+    <title>Smart Water</title>
     <link rel="stylesheet" href="./style.css">
-
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
-    <script>
-      const firebaseConfig = {
-        apiKey: "AIzaSyA9hWjeFmorWdQn5dGu1ut0BMlvaOLK-zY",
-        authDomain: "smartwater1-5e117.firebaseapp.com",
-        projectId: "smartwater1-5e117",
-        storageBucket: "smartwater1-5e117.firebasestorage.app",
-        messagingSenderId: "660889405048",
-        appId: "1:660889405048:web:db72a16ca75577c8184f8d",
-        measurementId: "G-EQMM2X3KSC"
-      };
-      firebase.initializeApp(firebaseConfig);
-      const db = firebase.firestore();
-    </script>
 </head>
 <body>
 
 <div class="app-container">
     <div id="step1" class="step-page active">
-        <div class="header-bar"><span>⚙️ Smart Water Dispenser</span></div>
-        <div class="content-body">
-            <div class="member-banner" id="btn-goto-register" style="cursor: pointer;">
-                <div class="banner-text">
-                    <strong>🌟 สมัครสมาชิกเพื่อรับส่วนลด</strong>
-                    <p>ซื้อครบทุก 5 ขวด รับส่วนลด 2 บาท!</p>
-                </div>
-                <div class="banner-arrow">➔</div>
+        <div class="hero-card">
+            <h1>💧 Smart Water</h1>
+            <p>สดชื่น สะอาด ปลอดภัย</p>
+            <button id="btn-goto-register" class="btn-primary">👤 สมัครสมาชิก / เช็คส่วนลด</button>
+        </div>
+        
+        <div class="menu-section">
+            <h3>เลือกปริมาณน้ำ</h3>
+            <div class="water-card" onclick="selectAmount(5, 600)">
+                <span>600 mL</span> <strong>5 ฿</strong>
             </div>
-            <div class="logo-section">
-                <div class="logo-circle"><div class="inner-gear">💧</div></div>
-                <span class="badge-online">ONLINE</span>
-                <h3>ตู้กดน้ำดื่ม Smart Water</h3>
-            </div>
-            <h4 class="section-title">เลือกรายการน้ำดื่ม</h4>
-            <div class="water-card" id="btn-water-5">
-                <div class="volume-badge">600mL</div>
-                <div class="card-details">
-                    <span class="water-title">น้ำดื่มสะอาด (ปกติ)</span>
-                </div>
-                <div class="price-tag">5 ฿</div>
-            </div>
-            <div class="water-card" id="btn-water-10">
-                <div class="volume-badge" style="background: #e0f2fe; color: #0369a1;">1L</div>
-                <div class="card-details">
-                    <span class="water-title">น้ำดื่มสะอาด (ถังใหญ่)</span>
-                </div>
-                <div class="price-tag">10 ฿</div>
+            <div class="water-card" onclick="selectAmount(10, 1000)">
+                <span>1 L</span> <strong>10 ฿</strong>
             </div>
         </div>
     </div>
 
     <div id="step2" class="step-page">
-        <div class="header-bar"><span>💳 ชำระเงิน</span></div>
-        <div class="content-body text-center">
-            <h2>สแกนเพื่อชำระเงิน</h2>
-            <div class="price-display">ยอดรวม: <span id="selected-price">0</span> บาท</div>
-            <button class="btn-demo" onclick="simulatePayment()">[เดโม] ชำระเงินสำเร็จ</button>
-            <button id="btn-back-to-home" style="margin-top: 15px; padding: 10px; width: 100%; cursor: pointer;">⬅️ ย้อนกลับไปเลือกใหม่</button>
+        <div class="payment-box">
+            <h2>💳 ชำระเงิน</h2>
+            <div class="price-big" id="selected-price">0 ฿</div>
+            <p>กรุณาสแกน QR Code ที่หน้าตู้</p>
+            <button onclick="simulatePayment()" class="btn-success">✅ [เดโม] จ่ายเงินแล้ว</button>
+            <button onclick="changePage('step2', 'step1')" class="btn-text">ย้อนกลับ</button>
         </div>
     </div>
 
     <div id="step3" class="step-page">
-        <div class="header-bar"><span>💧 กำลังทำงาน</span></div>
-        <div class="content-body text-center">
-            <h2 id="working-status-title">กำลังจ่ายน้ำ...</h2>
-            <div class="timer-circle"><span id="countdown-timer">⏳</span></div>
-            <button class="btn-stop" id="btn-main-action">🛑 กดหยุดจ่ายน้ำชั่วคราว</button>
+        <div class="dispense-box">
+            <h2 id="status-text">💧 กำลังจ่ายน้ำ...</h2>
+            <div class="timer-circle" id="countdown-timer">60</div>
+            <button id="btn-main-action" onclick="toggleDispenser()" class="btn-warning">🛑 หยุดจ่ายน้ำชั่วคราว</button>
         </div>
     </div>
 
-    <div id="registerPage" class="step-page">
-        <div class="header-bar"><span>📝 สมัครสมาชิก</span></div>
-        <div class="content-body" style="padding: 20px;">
-            <input type="text" placeholder="ชื่อ-นามสกุล" class="form-input" style="width: 100%; margin-bottom: 10px; padding: 10px;">
-            <input type="tel" placeholder="เบอร์โทรศัพท์" class="form-input" style="width: 100%; margin-bottom: 10px; padding: 10px;">
-            <button id="btn-submit-register" style="width: 100%; padding: 10px;">ยืนยันการสมัคร</button>
-            <button id="btn-cancel-register" style="width: 100%; padding: 10px; margin-top: 10px;">ยกเลิก</button>
+    <div id="step4" class="step-page">
+        <div class="success-box">
+            <h1>✨</h1>
+            <h2>จ่ายน้ำเสร็จสิ้น</h2>
+            <p>ขอบคุณที่ใช้บริการ</p>
+            <button onclick="changePage('step4', 'step1')" class="btn-primary">กลับหน้าหลัก</button>
         </div>
     </div>
 </div>
 
-<script src="./script.js" defer></script>
+<script src="./script.js"></script>
 </body>
 </html>
