@@ -1,12 +1,10 @@
-body { font-family: 'Kanit', sans-serif; background: #f4f7f9; display: flex; justify-content: center; }
-.app-container { width: 100%; max-width: 450px; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-.step-page { display: none; }
-.step-page.active { display: block; }
-.banner { background: #5a67d8; color: white; padding: 15px; border-radius: 15px; margin: 20px 0; cursor: pointer; }
-.water-card { display: flex; align-items: center; background: #fff; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; }
-.vol { background: #e2e8f0; padding: 10px; border-radius: 8px; font-weight: bold; }
-.info { margin-left: 15px; flex-grow: 1; }
-.price { font-weight: bold; font-size: 1.2em; }
-.timer { font-size: 40px; font-weight: bold; color: #5a67d8; text-align: center; margin: 20px 0; }
-.btn-main { background: #5a67d8; color: white; width: 100%; padding: 15px; border-radius: 10px; border: none; }
-.btn-warn { background: #ed8936; color: white; width: 100%; padding: 15px; border-radius: 10px; border: none; }
+body { font-family: sans-serif; background: #f8fafc; display: flex; justify-content: center; padding: 20px; }
+.app-container { width: 100%; max-width: 450px; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+header { background: #2b6cb0; color: white; padding: 20px; margin: -20px -20px 20px -20px; border-radius: 20px 20px 0 0; font-weight: bold; }
+.banner { background: #5a67d8; color: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; }
+.machine-status { text-align: center; border: 1px solid #e2e8f0; padding: 20px; border-radius: 20px; margin-bottom: 20px; }
+.icon-circle { font-size: 40px; background: #ebf8ff; width: 80px; height: 80px; line-height: 80px; border-radius: 50%; margin: 0 auto 10px; }
+.status-badge { background: #48bb78; color: white; font-size: 10px; padding: 2px 8px; border-radius: 10px; display: inline-block; }
+.water-card { display: flex; align-items: center; border: 1px solid #e2e8f0; padding: 15px; border-radius: 15px; margin-bottom: 15px; cursor: pointer; }
+.vol-badge { background: #edf2f7; padding: 15px; border-radius: 10px; font-weight: bold; margin-right: 15px; }
+.price { font-weight: bold; font-size: 1.2em; margin-left: auto; color: #2b6cb0; }
