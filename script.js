@@ -72,3 +72,16 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btn-submit-register").onclick = submitRegister;
     document.getElementById("btn-cancel-register").onclick = () => changePage("registerPage", "step1");
 });
+// --- วางไว้ใน script.js ตรงไหนก็ได้ที่อยู่นอกก้อน DOMContentLoaded ---
+
+window.simulatePayment = function() {
+    console.log("ปุ่มเดโมทำงานแล้ว!"); // เอาไว้เช็กใน F12 ว่ากดติดไหม
+    
+    // เปลี่ยนหน้าไป Step 3
+    changePage("step2", "step3");
+    
+    // อัปเดตสถานะ Firebase
+    db.collection("machine_control").doc("status_doc").update({
+        status: "dispensing"
+    }).catch(err => console.error("Firebase Error:", err));
+};
