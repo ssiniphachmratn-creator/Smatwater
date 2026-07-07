@@ -1,3 +1,4 @@
+let currentUserPhone = null;
 let countdown;
 let timeLeft = 60;
 
@@ -6,38 +7,62 @@ function changePage(hideId, showId) {
     document.getElementById(showId).classList.add('active');
 }
 
-// ระบบจ่ายน้ำและนับเวลา 1 นาที
+async function selectAmount(amount) {
+    let finalPrice = amount;
+    if (currentUserPhone) {
+        const doc = await db.collection("members").doc(currentUserPhone).get();
+        if (doc.exists && doc.data().stampCount >= 4) {
+            finalPrice = Math.max(0, amount - 2);
+            alert("ใช้ส่วนลด 2 บาท!");
+            db.collection("members").doc(currentUserPhone).update({ stampCount: 0 });
+        }
+    }
+    document.getElementById("selected-price").innerText = finalPrice + " ฿";
+    db.collection("machine_control").doc("status_doc").set({ status: "pending", price: finalPrice }, { merge: true });
+    changePage("step1", "step2");
+}
+
+function saveMember() {
+    const phone = document.getElementById("user-phone").value;
+    db.collection("members").doc(phone).set({ stampCount: 0 }).then(() => {
+        currentUserPhone = phone;
+        alert("สมัครเรียบร้อย! สะสมครบ 4 ครั้งลดทันที 2 บาท");
+        changePage('registerPage', 'step1');
+    });
+}
+
 function startDispensing() {
     timeLeft = 60;
-    document.getElementById("status-text").innerText = "💧 กำลังจ่ายน้ำ...";
     clearInterval(countdown);
-    
     countdown = setInterval(() => {
         timeLeft--;
         document.getElementById("countdown-timer").innerText = timeLeft;
         if (timeLeft <= 0) {
             clearInterval(countdown);
-            // เมื่อครบ 1 นาที ให้ตัดน้ำและไปหน้าเสร็จสิ้น
             db.collection("machine_control").doc("status_doc").update({ status: "completed" });
             changePage("step3", "step4");
         }
     }, 1000);
 }
 
-// ระบบ Toggle หยุด/จ่ายต่อ
+window.simulatePayment = function() {
+    changePage("step2", "step3");
+    
+    // อัปเดตแต้มสมาชิกเพิ่ม
+    if (currentUserPhone) {
+        db.collection("members").doc(currentUserPhone).update({
+            stampCount: firebase.firestore.FieldValue.increment(1)
+        });
+    }
+    startDispensing();
+};
+
 function toggleDispenser() {
     const btn = document.getElementById("btn-main-action");
     if (btn.innerText.includes("หยุด")) {
-        clearInterval(countdown); // หยุดนับเวลา
+        clearInterval(countdown);
         btn.innerText = "▶️ จ่ายน้ำต่อ";
-        document.getElementById("status-text").innerText = "⏸️ หยุดชั่วคราว";
     } else {
-        startDispensing(); // นับต่อ
+        startDispensing();
     }
 }
-
-// ฟังก์ชันเดโมชำระเงิน
-window.simulatePayment = function() {
-    changePage("step2", "step3");
-    startDispensing();
-};
