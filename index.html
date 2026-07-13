@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Water</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Google Font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&display=swap" rel="stylesheet">
+<title>Smart Water</title>
 
-  <!-- Font Awesome -->
-  <link rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<link rel="stylesheet" href="style.css">
+
 </head>
 
 <body>
@@ -27,22 +27,29 @@
 
 <header>
 
-<h2>💧 Smart Water</h2>
+<h1>💧 Smart Water</h1>
 
 <p>ตู้น้ำอัจฉริยะ</p>
 
 </header>
 
-<div class="card member">
+<div class="card">
 
-<h3><i class="fa-solid fa-user"></i> สมาชิก</h3>
+<h3>
+
+<i class="fa-solid fa-user"></i>
+
+สมัครสมาชิก
+
+</h3>
 
 <input
 type="text"
 id="memberName"
 placeholder="ชื่อสมาชิก">
 
-<button class="blue" onclick="registerMember()">
+<button class="blue"
+onclick="registerMember()">
 
 สมัครสมาชิก
 
@@ -60,7 +67,7 @@ placeholder="ชื่อสมาชิก">
 
 /
 
-4 ครั้ง
+3 ครั้ง
 
 <br>
 
@@ -72,29 +79,49 @@ placeholder="ชื่อสมาชิก">
 
 <div class="card">
 
-<h3>เลือกน้ำ</h3>
+<h3>
+
+เลือกขนาดน้ำ
+
+</h3>
 
 <div class="products">
 
 <div class="product"
-onclick="selectWater('600ml',5)">
+onclick="selectWater('600 ml',5)">
 
-  
+<i class="fa-solid fa-bottle-water"></i>
 
-<h4>600 ml</h4>
+<h4>
 
-<p>5 บาท</p>
+600 ml
+
+</h4>
+
+<p>
+
+5 บาท
+
+</p>
 
 </div>
 
 <div class="product"
-onclick="selectWater('1L',10)">
+onclick="selectWater('1 L',10)">
 
+<i class="fa-solid fa-bottle-water"></i>
 
+<h4>
 
-<h4>1 L</h4>
+1 L
 
-<p>10 บาท</p>
+</h4>
+
+<p>
+
+10 บาท
+
+</p>
 
 </div>
 
@@ -110,15 +137,15 @@ onclick="selectWater('1L',10)">
 
 <header>
 
-<h2>ชำระเงิน</h2>
+<h2>
+
+ชำระเงิน
+
+</h2>
 
 </header>
 
 <div class="card center">
-
-<img
-src="assets/qr.png"
-class="qr">
 
 <h3 id="priceText">
 
@@ -126,7 +153,23 @@ class="qr">
 
 </h3>
 
-<button class="green">
+<img src="assets/qr.png" class="qr">
+
+<p>
+
+กรุณาเข้าแอปธนาคารเพื่อชำระเงิน
+
+</p>
+
+<div id="paymentStatus">
+
+⌛ รอการชำระเงิน...
+
+</div>
+
+<button
+id="bankBtn"
+class="green">
 
 <i class="fa-solid fa-building-columns"></i>
 
@@ -134,11 +177,13 @@ class="qr">
 
 </button>
 
+<!-- ใช้ทดสอบก่อนเชื่อม ESP32 -->
+
 <button
 class="blue"
 onclick="paymentSuccess()">
 
-ชำระเงินเรียบร้อย
+จำลองการชำระเงิน
 
 </button>
 
@@ -152,7 +197,11 @@ onclick="paymentSuccess()">
 
 <header>
 
-<h2>กำลังจ่ายน้ำ</h2>
+<h2>
+
+กำลังจ่ายน้ำ
+
+</h2>
 
 </header>
 
@@ -176,7 +225,7 @@ onclick="paymentSuccess()">
 class="green"
 onclick="startDispense()">
 
-เริ่มจ่ายน้ำ
+▶️ จ่ายน้ำ
 
 </button>
 
@@ -184,49 +233,19 @@ onclick="startDispense()">
 class="red"
 onclick="stopDispense()">
 
-หยุดจ่ายน้ำ
+⏹️ หยุดจ่ายน้ำ
 
 </button>
 
 <p>
 
-ครบ 1 นาที
+เมื่อกดหยุด
 
-ระบบจะหยุดอัตโนมัติ
+ระบบจะนับถอยหลัง 1 นาที
 
-</p>
-
-</section>
-
-<!-- ================= SUCCESS ================= -->
-
-<section id="success" class="screen">
-
-<div class="success">
-
-<i class="fa-solid fa-circle-check"></i>
-
-<h2>
-
-จ่ายน้ำเสร็จสิ้น
-
-</h2>
-
-<p>
-
-ขอบคุณที่ใช้บริการ
+แล้วกลับหน้าหลักอัตโนมัติ
 
 </p>
-
-<button
-class="blue"
-onclick="goHome()">
-
-กลับหน้าหลัก
-
-</button>
-
-</div>
 
 </section>
 
@@ -235,4 +254,5 @@ onclick="goHome()">
 <script src="script.js"></script>
 
 </body>
+
 </html>
